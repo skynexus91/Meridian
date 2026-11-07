@@ -1,0 +1,48 @@
+{
+  "name": "meridian-romania",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n api,web \"tsx watch server/index.ts\" \"vite --host 127.0.0.1\"",
+    "build": "tsc --noEmit && vite build",
+    "start": "tsx server/index.ts",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:prod": "playwright test --config=playwright.production.config.ts",
+    "test:live": "tsx scripts/verify-live.ts",
+    "test:readiness": "tsx scripts/verify-live.ts --require-all",
+    "probe": "tsx scripts/probe.ts"
+  },
+  "dependencies": {
+    "@fastify/compress": "^9.3.0",
+    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/static": "^10.1.10",
+    "cheerio": "^1.2.0",
+    "fast-xml-parser": "^5.3.0",
+    "fastify": "^5.6.0",
+    "lucide-react": "^0.468.0",
+    "maplibre-gl": "^6.16.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "rss-parser": "^3.13.0",
+    "satellite.js": "^7.1.0",
+    "tsx": "^4.20.0",
+    "ws": "^8.18.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/ws": "^8.18.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "concurrently": "^9.2.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.2.0",
+    "vitest": "^4.0.0"
+  }
+}

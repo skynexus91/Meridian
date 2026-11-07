@@ -1,0 +1,97 @@
+import {suggestPlaces} from './suggestions.js';
+import {speedRoads} from './speed-roads.js';
+import {worldArticleReader} from './world-reader.js';
+import {worldNews,worldRadio} from './world.js';
+import {searchAddresses,reverseLocation} from './geocoding.js';
+import {articleReader} from './articles.js';
+import {inRomania} from './romania.js';
+import {drivingRoute,routeQuery} from './routing.js';
+import {cameraCatalogStatus} from './camera-catalog.js';
+import {roadDetail,cameraPlayer} from './integrations.js';
+import {earthLayers,satellitePositions} from './satellites.js';
+import Fastify from 'fastify';
+import compress from '@fastify/compress';
+import rateLimit from '@fastify/rate-limit';
+import fastifyStatic from '@fastify/static';
+import {existsSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {readFile} from 'node:fs/promises';
+import {timingSafeEqual} from 'node:crypto';
+import {z} from 'zod';
+import {sources,stations,cameras} from './catalog.js';
+import {places,searchPlaces} from './places.js';
+import {pois} from './pois.js';
+import {airports} from './airports.js';
+import {groupEvents,parseBbox,within,hash,coverageCountry,findEvent} from './domain.js';
+import {get,put,readArticles,sourceState,listRecords} from './store.js';
+import {getAircraft,getForecast,getCurrentWeather,getRoads,getShips,weatherLayers,layerHealth,cached} from './providers.js';
+import {collectFeeds} from './feeds.js';
+import {getWarnings} from './warnings.js';
+import {socialHtml} from './share.js';
+import type {NewsEvent,Station,Camera,Airport,POI} from '../src/types.js';
+export async function buildApp(){
+ const app=Fastify({logger:process.env.NODE_ENV==='production',bodyLimit:16384});
+ await app.register(compress,{globalDecompression:false,encodings:["br","gzip"]});
+ await app.register(rateLimit,{max:180,timeWindow:'1 minute',allowList:request=>!request.url.startsWith('/api/')});
+ app.addHook('onSend',async(_req,reply)=>{reply.header('X-Content-Type-Options','nosniff');reply.header('Referrer-Policy','strict-origin-when-cross-origin');reply.header('X-Frame-Options','SAMEORIGIN');});
+ app.setErrorHandler((error,_req,reply)=>{const explicit=(error as {statusCode?:number}).statusCode;const status=typeof explicit==='number'&&Number.isInteger(explicit)&&explicit>=400&&explicit<=599?explicit:error instanceof z.ZodError?400:500;reply.code(status>=500?500:status).send({error:status>=500?'Service temporarily unavailable':(error instanceof Error?error.message:'Invalid request')});});
+ app.get('/api/health',async()=>({ok:true,app:'meridian',version:'0.1.0',mode:'local-evaluation',now:new Date().toISOString()}));
+ app.get('/api/sources',async()=>{const articles=readArticles();return {sources:sources.map(s=>{const override=get<Partial<typeof s>>(`override:${s.id}`)??{};const state=sourceState(s.id);const count=articles.filter(a=>a.sourceId===s.id).length;return {...s,...override,...state,articles:count,status:!s.enabled?'disabled':state.error?(state.lastSuccess?'stale':'error'):state.lastSuccess?(Date.now()-Date.parse(state.lastSuccess)>2700000?'stale':'live'):'disabled'};})};});
+ const querySchema=z.object({country:z.enum(['RO']).optional(),category:z.string().max(40).optional(),q:z.string().max(200).optional(),region:z.string().max(80).optional(),place:z.string().max(80).optional(),places:z.string().max(2000).optional(),language:z.string().max(10).optional(),type:z.string().max(20).optional(),since:z.iso.datetime().optional(),bbox:z.string().max(100).optional(),limit:z.coerce.number().int().min(1).max(500).default(100),offset:z.coerce.number().int().min(0).max(5000).default(0)});
+ const allowedSources=new Set(sources.map(s=>s.id));
+ function allEvents(){const hidden=get<string[]>('hidden')??[];let events=groupEvents(readArticles().filter(a=>a.country==='RO'&&allowedSources.has(a.sourceId)&&coverageCountry(a.title,a.country)==='RO'&&!/advertorial|\(p\)|\[p\]|lovedeco\.ro|promo[țt]ional/i.test(a.title))).filter(e=>!hidden.includes(e.id)).map(e=>({...e,...get<Partial<NewsEvent>>(`event:${e.id}`)}));for(const merge of listRecords('merge:') as {ids:string[];note:string;at:string}[]){const target=events.find(e=>e.id===merge.ids[0]);if(!target)continue;const reports=events.filter(e=>merge.ids.includes(e.id)).flatMap(e=>e.articles);target.articles=[...new Map(reports.map(a=>[a.id,a])).values()];target.independentSources=new Set(target.articles.map(a=>a.chain)).size;target.revisions=[...(target.revisions??[]),{at:merge.at,note:merge.note}];target.updatedAt=[...target.articles.map(a=>a.publishedAt),merge.at].sort().at(-1)!;events=events.filter(e=>!merge.ids.includes(e.id)||e.id===target.id);}return events;}
+ app.get('/api/events',async(req,reply)=>{const parsed=querySchema.safeParse(req.query);if(!parsed.success)return reply.code(400).send({error:'Invalid event filters'});const q=parsed.data;const bbox=parseBbox(q.bbox);let events=allEvents().filter(e=>(!q.country||e.country===q.country)&&(!q.category||e.category===q.category)&&(!q.since||e.updatedAt>=q.since)&&(!q.region||e.place?.region===q.region)&&(!q.place||e.place?.id===q.place)&&(!q.places||!!e.place&&q.places.split(',').includes(e.place.id))&&(!q.language||e.articles.some(a=>a.language===q.language))&&(!q.type||e.articles.some(a=>a.sourceType===q.type))&&(!q.q||e.title.toLowerCase().includes(q.q.toLowerCase()))&&(!bbox||(e.place&&within(e.place.lon,e.place.lat,bbox))));return {total:events.length,events:events.slice(q.offset,q.offset+q.limit),asOf:new Date().toISOString()};});
+ app.get<{Params:{id:string}}>('/api/events/:id',async(req,reply)=>{const event=findEvent(allEvents(),req.params.id);return event??reply.code(404).send({error:'Event not found'});});
+ app.get<{Params:{id:string}}>('/api/articles/:id',async(req)=>articleReader(req.params.id));
+ app.get('/api/world/article/:id',async(req)=>{const p=z.object({id:z.string().regex(/^[a-f0-9]{8,64}$/)}).parse(req.params);return worldArticleReader(p.id);});
+ app.get('/api/world/news',async(req)=>{const q=z.object({q:z.string().max(180).default(''),traffic:z.enum(['true','false']).default('false'),lang:z.enum(['en','ro']).default('en'),country:z.string().regex(/^[A-Z]{2}$/).optional()}).parse(req.query);return worldNews(q.q,q.traffic==='true',q.lang,q.country);});
+ app.get('/api/world/radio',async(req)=>{const q=z.object({country:z.string().regex(/^[A-Z]{2}$/).optional(),name:z.string().max(100).default('')}).parse(req.query);return worldRadio(q.country??'',q.name);});
+ app.get('/api/speed-roads',{config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async(req)=>{const q=z.object({lat:z.coerce.number().finite().min(-85).max(85),lon:z.coerce.number().finite().min(-180).max(180)}).parse(req.query);return speedRoads(q.lat,q.lon);});
+ app.get('/api/location',async(req)=>{const q=z.object({lat:z.coerce.number().min(-90).max(90),lon:z.coerce.number().min(-180).max(180)}).parse(req.query);return {place:await reverseLocation(q.lat,q.lon)};});
+ app.get('/api/suggestions',{config:{rateLimit:{max:60,timeWindow:'1 minute'}}},async(req)=>{const q=z.object({q:z.string().trim().min(2).max(180),lat:z.coerce.number().min(-85).max(85).optional(),lon:z.coerce.number().min(-180).max(180).optional()}).parse(req.query);return {places:await suggestPlaces(q.q,q.lat,q.lon),provider:'Photon · OpenStreetMap'};});
+ app.get('/api/addresses',{config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async(req)=>{const q=z.object({q:z.string().trim().min(3).max(180)}).parse(req.query);return {places:await searchAddresses(q.q),attribution:'© OpenStreetMap contributors · Nominatim'};});
+ app.get('/api/places/search',async(req)=>{const q=z.object({q:z.string().max(100).default('')}).parse(req.query);return {places:searchPlaces(q.q)};});
+ app.get('/api/places',async()=>({places}));
+ app.get('/api/stations',async()=>({stations:stations.map(s=>({...s,...get<Partial<Station>>(`station:${s.id}`)}))}));
+ app.get('/api/airports',async(req)=>{const q=z.object({lat:z.coerce.number().optional(),lon:z.coerce.number().optional(),radius:z.coerce.number().default(10)}).parse(req.query);const lat=q.lat;const lon=q.lon;const radiusKm=q.radius;if(typeof lat!=='number'||typeof lon!=='number')return {airports:[]};const dist=(a:any)=>Math.hypot(a.lat-lat,(a.lon-lon)*Math.cos(lat*Math.PI/180))*111;const list=airports.map(a=>({...a,distKm:Math.round(dist(a)*10)/10})) as any;return {airports:list.filter((a:any)=>a.distKm<=radiusKm).sort((a:any,b:any)=>a.distKm-b.distKm),center:{lat,lon},radiusKm};}); app.get('/api/pois',async(req)=>{const q=z.object({lat:z.coerce.number().optional(),lon:z.coerce.number().optional(),radius:z.coerce.number().default(15),type:z.string().optional()}).parse(req.query);const lat=q.lat;const lon=q.lon;const radiusKm=q.radius;if(typeof lat!=='number'||typeof lon!=='number')return {pois:[]};const dist=(p:any)=>Math.hypot(p.lat-lat,(p.lon-lon)*Math.cos(lat*Math.PI/180))*111;const list=pois.map(p=>({...p,distKm:Math.round(dist(p)*10)/10})) as any;return q.type?{pois:list.filter((p:any)=>p.distKm<=radiusKm&&p.type===q.type).sort((a:any,b:any)=>a.distKm-b.distKm),center:{lat,lon},radiusKm,type:q.type}:{pois:list.filter((p:any)=>p.distKm<=radiusKm).sort((a:any,b:any)=>a.distKm-b.distKm),center:{lat,lon},radiusKm};});
+ app.get('/api/camera-player',async(req)=>{const q=z.object({id:z.string().max(500)}).parse(req.query);return cameraPlayer(q.id,req.hostname.split(":")[0]);});
+ app.get('/api/radars',async(req)=>{const q=z.object({south:z.coerce.number().min(-90).max(90),west:z.coerce.number().min(-180).max(180),north:z.coerce.number().min(-90).max(90),east:z.coerce.number().min(-180).max(180)}).parse(req.query);try{const url='https://overpass-api.de/api/interpreter?data='+encodeURIComponent('[out:json][timeout:25];node["highway"="speed_camera"]('+q.south+','+q.west+','+q.north+','+q.east+');out;');const r=await fetch(url,{signal:AbortSignal.timeout(25000)});if(!r.ok)return {radars:[]};const data=await r.json();const radars=(data.elements??[]).map((n:any)=>({id:n.id,lat:n.lat,lon:n.lon,type:n.tags.camera_type??'speed_camera',maxspeed:n.tags.maxspeed?Number(n.tags.maxspeed):undefined}));return {radars};}catch{return {radars:[]}}});
+ app.get('/api/road-detail',async(req,reply)=>{const q=z.object({id:z.string().max(1000)}).parse(req.query);const roads=await getRoads();if(!roads.data?.some(r=>r.id===q.id))return reply.code(404).send({error:'Buletinul nu mai este activ în sursa curentă.'});return roadDetail(q.id);});
+ app.get('/api/cameras',async()=>({catalog:cameraCatalogStatus(),cameras:cameras.map(s=>({...s,...get<Partial<Camera>>(`camera:${s.id}`)}))}));
+ app.get('/api/earth/layers',earthLayers);
+ app.get('/api/satellites',async(req)=>{
+  const q=z.object({lat:z.coerce.number().min(-90).max(90).optional(),lon:z.coerce.number().min(-180).max(180).optional()}).parse(req.query);
+  const result=await satellitePositions(q.lat!==undefined&&q.lon!==undefined?{lat:q.lat,lon:q.lon}:{lat:44.4268,lon:26.1025});return {...result,data:result.data.filter(s=>s.nextPassAt)};
+ });
+ app.get('/api/route',{config:{rateLimit:{max:10,timeWindow:'1 minute'}}},async(req)=>drivingRoute(routeQuery.parse(req.query)));
+ app.get('/api/layers',async()=>({layers:await layerHealth()}));
+ app.get('/api/observations',async(req)=>{const q=z.object({layer:z.enum(['air','sea','road']),bbox:z.string().max(100).optional()}).parse(req.query);const b=parseBbox(q.bbox);const result=q.layer==='air'?await getAircraft():q.layer==='sea'?getShips():await getRoads();return {...result,data:(result.data??[]).filter(o=>inRomania(o.lon,o.lat)&&(!b||within(o.lon,o.lat,b)))};});
+ app.get('/api/weather',async(req)=>{const {lat,lon}=z.object({lat:z.coerce.number().min(-90).max(90),lon:z.coerce.number().min(-180).max(180)}).parse(req.query);return getForecast(lat,lon);});
+ app.get('/api/weather/current',async(req)=>{const q=z.object({lat:z.coerce.number().min(-90).max(90),lon:z.coerce.number().min(-180).max(180)}).parse(req.query);return getCurrentWeather(q.lat,q.lon);});
+ app.get('/api/weather/layers',weatherLayers);
+ app.get('/api/warnings',getWarnings);
+ const flowCache=new Map<string,{at:number;body:Buffer}>();
+ app.get<{Params:{z:string;x:string;y:string}}>('/api/traffic/flow/:z/:x/:y',async(req,reply)=>{if(!process.env.TOMTOM_API_KEY)return reply.code(503).send({error:'Licensed traffic-flow provider is not configured'});const p=z.object({z:z.coerce.number().int().min(0).max(18),x:z.coerce.number().int().min(0),y:z.coerce.number().int().min(0)}).parse(req.params);if(p.x>=2**p.z||p.y>=2**p.z)return reply.code(400).send({error:'Tile coordinate out of range'});const key=`${p.z}/${p.x}/${p.y}`;let entry=flowCache.get(key);if(!entry||Date.now()-entry.at>60000){const url=new URL(`https://api.tomtom.com/traffic/map/4/tile/flow/relative0/${key}.png`);url.searchParams.set('key',process.env.TOMTOM_API_KEY);const r=await fetch(url,{signal:AbortSignal.timeout(15000)});if(!r.ok||!r.headers.get('content-type')?.startsWith('image/'))return reply.code(502).send({error:'Traffic-flow provider unavailable'});entry={at:Date.now(),body:Buffer.from(await r.arrayBuffer())};flowCache.set(key,entry);if(flowCache.size>128)flowCache.delete(flowCache.keys().next().value!);}reply.header('Cache-Control','private, max-age=30').type('image/png');return entry.body;});
+ app.get<{Params:{id:string};Querystring:{time?:string;projection?:string}}>('/api/weather/satellite/:id',async(req,reply)=>{
+  const id=z.enum(['msg_fes:ir108','msg_fes:vis006']).parse(req.params.id);const time=z.iso.datetime().parse(req.query.time);const latest=(await weatherLayers()).layers.find(l=>l.id===id);if(!latest?.frames.some(f=>f.time===time))return reply.code(400).send({error:'Satellite frame not in available product metadata'});
+  const geographic=z.enum(['geographic','mercator']).default('mercator').parse(req.query.projection)==='geographic';
+  const key=`sat-image:${hash(id+time+geographic)}`;const result=await cached<string>(key,3600000,async()=>{
+   const merc=(x:number)=>Math.log(Math.tan(Math.PI/4+x*Math.PI/360))*6378137;
+   const url=new URL('https://view.eumetsat.int/geoserver/wms');url.search=new URLSearchParams({service:'WMS',version:'1.1.1',request:'GetMap',layers:id,styles:'',format:'image/png',transparent:'true',srs:geographic?'EPSG:4326':'EPSG:3857',bbox:(geographic?[20,43,41,53]:[20*111319.490793,merc(43),41*111319.490793,merc(53)]).join(','),width:'1280',height:'960',time}).toString();
+   for(let attempt=0;attempt<2;attempt++){try{const r=await fetch(url,{signal:AbortSignal.timeout(20000)});if(!r.ok)throw new Error(`Satellite image provider returned HTTP ${r.status}`);if(!r.headers.get('content-type')?.startsWith('image/'))throw new Error('Satellite provider did not return an image');const bytes=Buffer.from(await r.arrayBuffer());if(bytes.subarray(0,8).toString('hex')!=='89504e470d0a1a0a')throw new Error('Satellite provider returned invalid image data');return bytes.toString('base64');}catch(error){if(attempt===1)throw error;await new Promise(resolve=>setTimeout(resolve,500));}}throw new Error('Satellite image unavailable');
+  });if(!result.data)return reply.code(502).send({error:result.error});reply.header('Cache-Control','public, max-age=300').type('image/png');return Buffer.from(result.data,'base64');
+ });
+
+ app.post('/api/reports',async(req,reply)=>{const body=z.object({eventId:z.string().max(80),reason:z.string().min(10).max(2000)}).parse(req.body);const id=crypto.randomUUID();put(`report:${id}`,{...body,createdAt:new Date().toISOString()});return reply.code(201).send({id,status:'Saved for local administrator review'});});
+ app.addHook('preHandler',async(req,reply)=>{if(!req.url.startsWith('/api/admin'))return;const expected=Buffer.from(process.env.ADMIN_TOKEN??'');const input=Buffer.from(req.headers.authorization?.replace(/^Bearer /,'')??'');if(!expected.length||input.length!==expected.length||!timingSafeEqual(input,expected))return reply.code(401).send({error:'Administrator token required'});});
+ app.post<{Params:{id:string}}>('/api/admin/sources/:id',async(req,reply)=>{const source=sources.find(s=>s.id===req.params.id);if(!source)return reply.code(404).send({error:'Unknown source'});const body=z.object({enabled:z.boolean()}).parse(req.body);source.enabled=body.enabled;put(`override:${source.id}`,body);return {ok:true};});
+ app.post<{Params:{id:string}}>('/api/admin/events/:id',async(req)=>{const body=z.object({title:z.string().min(3).max(700).optional(),placeId:z.string().optional(),hidden:z.boolean().optional(),note:z.string().min(3).max(500)}).parse(req.body);const prev=get<Partial<NewsEvent>>(`event:${req.params.id}`)??{};const place=body.placeId?places.find(p=>p.id===body.placeId):undefined;if(body.placeId&&!place)throw new Error('Unknown place');const edit={...prev,...(body.title?{title:body.title}:{}),...(place?{place,precision:'city'}:{}),revisions:[...(prev.revisions??[]),{at:new Date().toISOString(),note:body.note}]};put(`event:${req.params.id}`,edit);if(body.hidden!==undefined){const hidden=new Set(get<string[]>('hidden')??[]);body.hidden?hidden.add(req.params.id):hidden.delete(req.params.id);put('hidden',[...hidden]);}return {ok:true};});
+ app.post('/api/admin/refresh',async()=>{void collectFeeds();return {status:'Refresh scheduled'};});
+ app.get('/api/admin/reports',async()=>({reports:listRecords('report:')}));
+ app.get('/api/admin/config',async()=>({providers:{ais:!!process.env.AISSTREAM_API_KEY,forecast:!!process.env.OPEN_METEO_API_KEY,roads:!!process.env.TOMTOM_API_KEY},sources:sources.map(s=>({id:s.id,name:s.name,enabled:s.enabled}))}));
+ app.post<{Params:{id:string}}>('/api/admin/stations/:id',async(req,reply)=>{if(!stations.some(s=>s.id===req.params.id))return reply.code(404).send({error:'Unknown station'});const body=z.object({stream:z.url().refine(u=>u.startsWith('https://'),'Use an HTTPS stream'),rights:z.string().min(20).max(1000)}).parse(req.body);put(`station:${req.params.id}`,body);return {ok:true};});
+ app.post('/api/admin/merge',async(req,reply)=>{const body=z.object({ids:z.array(z.string().max(80)).min(2).max(10),note:z.string().min(10).max(500)}).parse(req.body);const current=allEvents();if(body.ids.some(id=>!current.some(e=>e.id===id)))return reply.code(404).send({error:'An event no longer exists'});const matched=current.filter(e=>body.ids.includes(e.id));if(new Set(matched.map(e=>e.country)).size>1)return reply.code(400).send({error:'Cross-country merge requires editorial review outside this tool'});put(`merge:${body.ids[0]}`,{ids:body.ids,note:body.note,at:new Date().toISOString()});return {ok:true};});
+ for(const source of sources)Object.assign(source,get(`override:${source.id}`)??{});
+ if(existsSync(resolve('dist/index.html'))){app.get('/',async(req,reply)=>{const index=await readFile(resolve('dist/index.html'),'utf8');const eventId=(req.query as {event?:string}).event;const event=typeof eventId==='string'?allEvents().find(e=>e.id===eventId):undefined;return reply.type('text/html; charset=utf-8').send(socialHtml(index,event));});await app.register(fastifyStatic,{root:resolve('dist'),wildcard:true,index:false});app.setNotFoundHandler((req,reply)=>req.url.startsWith('/api/')?reply.code(404).send({error:'API route not found'}):reply.sendFile('index.html'));}
+ return app;
+}

@@ -1,0 +1,4 @@
+import {mkdir,writeFile} from 'node:fs/promises';
+const urls=['https://www.ziaruldeiasi.ro/','https://www.monitorulsv.ro/','https://www.viata-libera.ro/','https://www.meteoromania.ro/vremea/avertizari/','https://www.politiaromana.ro/ro/info-trafic','https://api.srr.ro/stream/playlist.htm'];
+await mkdir('data/discovery',{recursive:true});
+await Promise.all(urls.map(async(url,i)=>{try{const r=await fetch(url,{signal:AbortSignal.timeout(20000)});const s=await r.text();await writeFile(`data/discovery/${i}.html`,s);console.log(JSON.stringify({url,status:r.status,links:[...s.matchAll(/<link\b[^>]*(?:rss|atom)[^>]*>/gi)].map(m=>m[0]),references:[...s.matchAll(/(?:https?:[^\s"'<>]+(?:\.xml|\.rss|\.m3u8|\.mp3)|[^"'<>\s]*(?:rss|feed|stream)[^"'<>\s]*)/gi)].map(m=>m[0]).slice(0,15)}));}catch(e){console.log(url,String(e));}}));
