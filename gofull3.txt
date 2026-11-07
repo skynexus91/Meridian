@@ -1,0 +1,134 @@
+
+Running 19 tests using 1 worker
+
+  ok  1 [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints (38.8s)
+  ok  2 [desktop] › tests\e2e\navigation.spec.ts:27:1 › keeps information panels mutually exclusive and traffic automatic (30.3s)
+  ok  3 [desktop] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route (31.9s)
+  ok  4 [desktop] › tests\e2e\navigation.spec.ts:38:1 › searches full addresses only on request and selects the result (11.9s)
+  x   5 [desktop] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania (23.3s)
+  x   6 [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar (3.4m)
+  ok  7 [desktop] › tests\e2e\navigation.spec.ts:52:1 › fits the news window and reads stories inside the app (13.1s)
+  ok  8 [desktop] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation (47.5s)
+  ok  9 [desktop] › tests\e2e\navigation.spec.ts:62:1 › explains denied GPS permission without inventing a live position (23.5s)
+  ok 10 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h (54.4s)
+  ok 11 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph (46.9s)
+  ok 12 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph (40.0s)
+  ok 13 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback (32.8s)
+  ok 14 [desktop] › tests\e2e\navigation.spec.ts:76:1 › news uses the GPS locality instead of the route destination (17.1s)
+  ok 15 [desktop] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins (36.5s)
+  x  16 [desktop] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation (1.3m)
+  ok 17 [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud (26.7s)
+  ok 18 [desktop] › tests\e2e\navigation.spec.ts:108:2 › slides the news dock out of view and restores it with its handle (54.9s)
+  ok 19 [desktop] › tests\e2e\navigation.spec.ts:111:2 › searches POI categories from the upper search box (26.2s)
+
+
+  1) [desktop] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('.world-location-results')
+    Expected substring: "London, United Kingdom"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" locator('.world-location-results') with timeout 5000ms
+      - waiting for locator('.world-location-results')
+
+
+      43 | test('autocomplete and manual information search work outside Romania',async({page})=>{
+      44 |  const london={id:'london',name:'London, United Kingdom',country:'GB',region:'London',lat:51.5074,lon:-.1278,aliases:[]};await page.route('**/api/suggestions?*',r=>r.fulfill({json:{places:[london]}}));await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Lond');await expect(page.locator('.route-suggestions')).toContainText('London, United Kingdom');await page.locator('.route-suggestions button').filter({hasText:'London, United Kingdom'}).click();
+    > 45 |  await page.locator('.panel-toggle').click();await page.locator('.rail>button').filter({hasText:'Meteo'}).click();await page.getByRole('textbox',{name:'Zona de informare',exact:true}).fill('Lond');await expect(page.locator('.world-location-results')).toContainText('London, United Kingdom');await page.locator('.world-location-results button').filter({hasText:'London, United Kingdom'}).click();await expect(page.locator('.weather-now')).toContainText('London');await expect(page.locator('.world-panel>header')).toContainText('London');
+         |                                                                                                                                                                                                                                                            ^
+      46 | });
+      47 | test('keeps route search inline and remembers a moved toolbar',async({page})=>{test.setTimeout(180000);
+      48 |  const header=page.locator('.topbar');const brand=await page.locator('.panel-toggle').boundingBox();const fields=await page.locator('.route-fields').boundingBox();expect(brand).not.toBeNull();expect(fields).not.toBeNull();expect(Math.abs((brand!.y+brand!.height/2)-(fields!.y+fields!.height/2))).toBeLessThan(12);
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:45:252
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: page.reload: Test timeout of 180000ms exceeded.
+    Call log:
+      - waiting for navigation until "domcontentloaded"
+        - navigated to "http://127.0.0.1:3002/"
+
+
+      47 | test('keeps route search inline and remembers a moved toolbar',async({page})=>{test.setTimeout(180000);
+      48 |  const header=page.locator('.topbar');const brand=await page.locator('.panel-toggle').boundingBox();const fields=await page.locator('.route-fields').boundingBox();expect(brand).not.toBeNull();expect(fields).not.toBeNull();expect(Math.abs((brand!.y+brand!.height/2)-(fields!.y+fields!.height/2))).toBeLessThan(12);
+    > 49 |  const before=await header.boundingBox();const handle=page.locator('.toolbar-drag');const rect=await handle.boundingBox();await page.mouse.move(rect!.x+rect!.width/2,rect!.y+rect!.height/2);await page.mouse.down();await page.mouse.move(rect!.x+rect!.width/2,rect!.y+rect!.height/2+110,{steps:8});await page.mouse.up();const moved=await header.boundingBox();expect(moved!.y-before!.y).toBeGreaterThan(80);await page.reload({waitUntil:'domcontentloaded'});await expect.poll(async()=>Math.round((await header.boundingBox())!.y)).toBe(Math.round(moved!.y));expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                ^
+      50 | });
+      51 |
+      52 | test('fits the news window and reads stories inside the app',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:49:416
+
+    Error Context: test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [desktop] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('.gps-position')
+    Expected: 1
+    Received: 0
+    Timeout:  30000ms
+
+    Call log:
+      - Expect "toHaveCount" locator('.gps-position') with timeout 30000ms
+      - waiting for locator('.gps-position')
+        33 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      93 |  const bounds=await page.locator('.route-bottom-card').boundingBox();expect(bounds).not.toBeNull();const viewport=page.viewportSize()!;expect(bounds!.y).toBeGreaterThan(viewport.height/2);expect(bounds!.y+bounds!.height).toBeLessThanOrEqual(viewport.height);
+      94 |  await page.evaluate(()=>{Object.defineProperty(navigator,'geolocation',{configurable:true,value:{watchPosition:(success:(position:unknown)=>void)=>{(window as any).emitGps=success;return 1;},clearWatch:()=>{}}});});await page.getByRole('button',{name:'Pornește GPS',exact:true}).click();
+    > 95 |  const emit=async(lon:number,lat:number)=>page.evaluate(({lon,lat})=>(window as any).emitGps({coords:{longitude:lon,latitude:lat,heading:0,accuracy:5,speed:12},timestamp:Date.now()}),{lon,lat});await emit(26.1025,44.44);await expect(page.locator('.gps-position')).toHaveCount(1,{timeout:30000});const marker=await page.locator('.gps-position').evaluate(el=>{(el as HTMLElement).dataset.persistent='yes';return true;});expect(marker).toBe(true);
+         |                                                                                                                                                                                                                                                                         ^
+      96 |  await emit(26.1125,44.44);await page.waitForTimeout(3900);await emit(26.1126,44.4401);await expect.poll(()=>routes).toBe(2);await expect(page.locator('.gps-position')).toHaveCount(1);await expect(page.locator('.gps-position')).toHaveAttribute('data-persistent','yes');await expect(page.getByTestId('map-canvas')).toHaveAttribute('data-zoom',/^18/);await page.screenshot({path:'review-new-navigation.png'});
+      97 | });
+      98 |
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:95:265
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [desktop] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania 
+    [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar 
+    [desktop] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation 
+  16 passed (14.3m)

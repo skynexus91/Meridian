@@ -1,0 +1,1186 @@
+
+Running 38 tests using 1 worker
+
+  x   1 [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints (713ms)
+  x   2 [desktop] › tests\e2e\navigation.spec.ts:27:1 › keeps information panels mutually exclusive and traffic automatic (711ms)
+  x   3 [desktop] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route (694ms)
+  x   4 [desktop] › tests\e2e\navigation.spec.ts:38:1 › searches full addresses only on request and selects the result (663ms)
+  x   5 [desktop] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania (687ms)
+  x   6 [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar (660ms)
+  x   7 [desktop] › tests\e2e\navigation.spec.ts:52:1 › fits the news window and reads stories inside the app (694ms)
+  x   8 [desktop] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation (601ms)
+  x   9 [desktop] › tests\e2e\navigation.spec.ts:62:1 › explains denied GPS permission without inventing a live position (626ms)
+  x  10 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h (661ms)
+  x  11 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph (728ms)
+  x  12 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph (617ms)
+  x  13 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback (647ms)
+  x  14 [desktop] › tests\e2e\navigation.spec.ts:76:1 › news uses the GPS locality instead of the route destination (701ms)
+  x  15 [desktop] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins (664ms)
+  x  16 [desktop] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation (755ms)
+  x  17 [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud (695ms)
+  x  18 [desktop] › tests\e2e\navigation.spec.ts:105:2 › slides the news dock out of view and restores it with its handle (701ms)
+  x  19 [desktop] › tests\e2e\navigation.spec.ts:108:2 › searches POI categories from the upper search box (586ms)
+  x  20 [mobile] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints (745ms)
+  x  21 [mobile] › tests\e2e\navigation.spec.ts:27:1 › keeps information panels mutually exclusive and traffic automatic (801ms)
+  x  22 [mobile] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route (738ms)
+  x  23 [mobile] › tests\e2e\navigation.spec.ts:38:1 › searches full addresses only on request and selects the result (770ms)
+  x  24 [mobile] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania (806ms)
+  x  25 [mobile] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar (722ms)
+  x  26 [mobile] › tests\e2e\navigation.spec.ts:52:1 › fits the news window and reads stories inside the app (618ms)
+  x  27 [mobile] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation (799ms)
+  x  28 [mobile] › tests\e2e\navigation.spec.ts:62:1 › explains denied GPS permission without inventing a live position (767ms)
+  x  29 [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h (596ms)
+  x  30 [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph (746ms)
+  x  31 [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph (742ms)
+  x  32 [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback (607ms)
+  x  33 [mobile] › tests\e2e\navigation.spec.ts:76:1 › news uses the GPS locality instead of the route destination (788ms)
+  x  34 [mobile] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins (751ms)
+  x  35 [mobile] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation (737ms)
+  x  36 [mobile] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud (743ms)
+  x  37 [mobile] › tests\e2e\navigation.spec.ts:105:2 › slides the news dock out of view and restores it with its handle (746ms)
+  x  38 [mobile] › tests\e2e\navigation.spec.ts:108:2 › searches POI categories from the upper search box (786ms)
+
+
+  1) [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop] › tests\e2e\navigation.spec.ts:27:1 › keeps information panels mutually exclusive and traffic automatic 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-keeps-informati-b196a-usive-and-traffic-automatic-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-keeps-informati-b196a-usive-and-traffic-automatic-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-informati-b196a-usive-and-traffic-automatic-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-informati-b196a-usive-and-traffic-automatic-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [desktop] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [desktop] › tests\e2e\navigation.spec.ts:38:1 › searches full addresses only on request and selects the result 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    Error Context: test-results\navigation-searches-full-a-2928f-uest-and-selects-the-result-desktop\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-searches-full-a-2928f-uest-and-selects-the-result-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-searches-full-a-2928f-uest-and-selects-the-result-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [desktop] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    Error Context: test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [desktop] › tests\e2e\navigation.spec.ts:52:1 › fits the news window and reads stories inside the app 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-fits-the-news-w-150e9-eads-stories-inside-the-app-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-fits-the-news-w-150e9-eads-stories-inside-the-app-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-fits-the-news-w-150e9-eads-stories-inside-the-app-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-fits-the-news-w-150e9-eads-stories-inside-the-app-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [desktop] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    Error Context: test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-desktop\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) [desktop] › tests\e2e\navigation.spec.ts:62:1 › explains denied GPS permission without inventing a live position 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    Error Context: test-results\navigation-explains-denied-babe9-t-inventing-a-live-position-desktop\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-explains-denied-babe9-t-inventing-a-live-position-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-explains-denied-babe9-t-inventing-a-live-position-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-6ddb5-and-mapped-limit-in-RO-km-h-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-automatically-d-6ddb5-and-mapped-limit-in-RO-km-h-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-6ddb5-and-mapped-limit-in-RO-km-h-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-6ddb5-and-mapped-limit-in-RO-km-h-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    Error Context: test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-desktop\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) [desktop] › tests\e2e\navigation.spec.ts:76:1 › news uses the GPS locality instead of the route destination 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-news-uses-the-G-92d45-ad-of-the-route-destination-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-news-uses-the-G-92d45-ad-of-the-route-destination-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-news-uses-the-G-92d45-ad-of-the-route-destination-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-news-uses-the-G-92d45-ad-of-the-route-destination-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) [desktop] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16) [desktop] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  17) [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  18) [desktop] › tests\e2e\navigation.spec.ts:105:2 › slides the news dock out of view and restores it with its handle 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-slides-the-news-143b0-restores-it-with-its-handle-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-slides-the-news-143b0-restores-it-with-its-handle-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-slides-the-news-143b0-restores-it-with-its-handle-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-slides-the-news-143b0-restores-it-with-its-handle-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  19) [desktop] › tests\e2e\navigation.spec.ts:108:2 › searches POI categories from the upper search box 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    Error Context: test-results\navigation-searches-POI-categories-from-the-upper-search-box-desktop\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-searches-POI-categories-from-the-upper-search-box-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-searches-POI-categories-from-the-upper-search-box-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  20) [mobile] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  21) [mobile] › tests\e2e\navigation.spec.ts:27:1 › keeps information panels mutually exclusive and traffic automatic 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-keeps-informati-b196a-usive-and-traffic-automatic-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-keeps-informati-b196a-usive-and-traffic-automatic-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-informati-b196a-usive-and-traffic-automatic-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-informati-b196a-usive-and-traffic-automatic-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  22) [mobile] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  23) [mobile] › tests\e2e\navigation.spec.ts:38:1 › searches full addresses only on request and selects the result 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-searches-full-a-2928f-uest-and-selects-the-result-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-searches-full-a-2928f-uest-and-selects-the-result-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-searches-full-a-2928f-uest-and-selects-the-result-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-searches-full-a-2928f-uest-and-selects-the-result-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  24) [mobile] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-autocomplete-an-2a4b9-search-work-outside-Romania-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  25) [mobile] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  26) [mobile] › tests\e2e\navigation.spec.ts:52:1 › fits the news window and reads stories inside the app 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    Error Context: test-results\navigation-fits-the-news-w-150e9-eads-stories-inside-the-app-mobile\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-fits-the-news-w-150e9-eads-stories-inside-the-app-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-fits-the-news-w-150e9-eads-stories-inside-the-app-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  27) [mobile] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  28) [mobile] › tests\e2e\navigation.spec.ts:62:1 › explains denied GPS permission without inventing a live position 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-explains-denied-babe9-t-inventing-a-live-position-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-explains-denied-babe9-t-inventing-a-live-position-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-explains-denied-babe9-t-inventing-a-live-position-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-explains-denied-babe9-t-inventing-a-live-position-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  29) [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    Error Context: test-results\navigation-automatically-d-6ddb5-and-mapped-limit-in-RO-km-h-mobile\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-6ddb5-and-mapped-limit-in-RO-km-h-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-6ddb5-and-mapped-limit-in-RO-km-h-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  30) [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  31) [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  32) [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    Error Context: test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-mobile\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  33) [mobile] › tests\e2e\navigation.spec.ts:76:1 › news uses the GPS locality instead of the route destination 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-news-uses-the-G-92d45-ad-of-the-route-destination-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-news-uses-the-G-92d45-ad-of-the-route-destination-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-news-uses-the-G-92d45-ad-of-the-route-destination-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-news-uses-the-G-92d45-ad-of-the-route-destination-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  34) [mobile] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  35) [mobile] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  36) [mobile] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  37) [mobile] › tests\e2e\navigation.spec.ts:105:2 › slides the news dock out of view and restores it with its handle 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-slides-the-news-143b0-restores-it-with-its-handle-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-slides-the-news-143b0-restores-it-with-its-handle-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-slides-the-news-143b0-restores-it-with-its-handle-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-slides-the-news-143b0-restores-it-with-its-handle-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  38) [mobile] › tests\e2e\navigation.spec.ts:108:2 › searches POI categories from the upper search box 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3001/
+    Call log:
+      - navigating to "http://127.0.0.1:3001/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-searches-POI-categories-from-the-upper-search-box-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-searches-POI-categories-from-the-upper-search-box-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-searches-POI-categories-from-the-upper-search-box-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-searches-POI-categories-from-the-upper-search-box-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  38 failed
+    [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints 
+    [desktop] › tests\e2e\navigation.spec.ts:27:1 › keeps information panels mutually exclusive and traffic automatic 
+    [desktop] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route 
+    [desktop] › tests\e2e\navigation.spec.ts:38:1 › searches full addresses only on request and selects the result 
+    [desktop] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania 
+    [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar 
+    [desktop] › tests\e2e\navigation.spec.ts:52:1 › fits the news window and reads stories inside the app 
+    [desktop] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation 
+    [desktop] › tests\e2e\navigation.spec.ts:62:1 › explains denied GPS permission without inventing a live position 
+    [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h 
+    [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph 
+    [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph 
+    [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback 
+    [desktop] › tests\e2e\navigation.spec.ts:76:1 › news uses the GPS locality instead of the route destination 
+    [desktop] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins 
+    [desktop] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation 
+    [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud 
+    [desktop] › tests\e2e\navigation.spec.ts:105:2 › slides the news dock out of view and restores it with its handle 
+    [desktop] › tests\e2e\navigation.spec.ts:108:2 › searches POI categories from the upper search box 
+    [mobile] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints 
+    [mobile] › tests\e2e\navigation.spec.ts:27:1 › keeps information panels mutually exclusive and traffic automatic 
+    [mobile] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route 
+    [mobile] › tests\e2e\navigation.spec.ts:38:1 › searches full addresses only on request and selects the result 
+    [mobile] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania 
+    [mobile] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar 
+    [mobile] › tests\e2e\navigation.spec.ts:52:1 › fits the news window and reads stories inside the app 
+    [mobile] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation 
+    [mobile] › tests\e2e\navigation.spec.ts:62:1 › explains denied GPS permission without inventing a live position 
+    [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h 
+    [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph 
+    [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph 
+    [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback 
+    [mobile] › tests\e2e\navigation.spec.ts:76:1 › news uses the GPS locality instead of the route destination 
+    [mobile] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins 
+    [mobile] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation 
+    [mobile] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud 
+    [mobile] › tests\e2e\navigation.spec.ts:105:2 › slides the news dock out of view and restores it with its handle 
+    [mobile] › tests\e2e\navigation.spec.ts:108:2 › searches POI categories from the upper search box 

@@ -1,0 +1,95 @@
+��
+Running 3 tests using 1 worker
+
+  x  1 [desktop] ��Q% tests\e2e\navigation.spec.ts:34:1 ��Q% shows routing failures without offering GPS for a missing route (1.5m)
+  x  2 [desktop] ��Q% tests\e2e\navigation.spec.ts:80:1 ��Q% uses one GPS control, selects map pins, automatically shows POIs and saves pins (1.3m)
+  ok 3 [desktop] ��Q% tests\e2e\navigation.spec.ts:99:1 ��Q% shows weather for the searched destination and supports voice search plus news read aloud (27.8s)
+
+
+  1) [desktop] ��Q% tests\e2e\navigation.spec.ts:34:1 ��Q% shows routing failures without offering GPS for a missing route 
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Calculeaz%� traseul', exact: true })
+
+
+      33 | });
+      34 | test('shows routing failures without offering GPS for a missing route',async({page})=>{
+    > 35 |  let attempts=0;await page.route('**/api/route?*',r=>{attempts++;return r.fulfill({status:503,json:{error:'Routing temporarily unavailable'}});});await page.getByRole('button',{name:'FoloseZ%�te GPS',exact:true}).click();await page.getByRole('textbox',{name:'DestinaZ%�ie',exact:true}).fill('Ploie');await page.locator('.route-suggestions button').first().click();await page.getByRole('button',{name:'Calculeaz%� traseul',exact:true}).click();await openRouteDock(page);await expect(page.locator('.navigation-panel [role=alert]')).toHaveText('Routing temporarily unavailable');await expect(page.getByRole('button',{name:'PorneZ%�te GPS',exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Calculeaz%� traseul',exact:true}).click();await openRouteDock(page);await expect.poll(()=>attempts).toBe(2);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ^
+      36 | });
+      37 |
+      38 | test('searches full addresses only on request and selects the result',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:35:729
+
+    attachment #1: screenshot (image/png) ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+    test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\test-failed-1.png
+    ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+
+    Error Context: test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ���������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+    test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\trace.zip
+
+    ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+
+  2) [desktop] ��Q% tests\e2e\navigation.spec.ts:80:1 ��Q% uses one GPS control, selects map pins, automatically shows POIs and saves pins 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('.map-controls button')
+    Expected: 3
+    Received: 0
+    Timeout:  60000ms
+
+    Call log:
+      - Expect "toHaveCount" locator('.map-controls button') with timeout 60000ms
+      - waiting for locator('.map-controls button')
+        92 %� locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      81 |  const poi={id:'osm:node:44',name:'Nearby fuel',type:'fuel',city:'BucureZ%�ti',region:'BucureZ%�ti',lat:44.427,lon:26.103,rights:'OpenStreetMap'};
+      82 |  await page.route('**/api/pois?*',r=>r.fulfill({json:{pois:[poi]}}));await page.locator('.route-collapse').click();
+    > 83 |  await expect(page.locator('.map-controls button')).toHaveCount(3,{timeout:60000});await expect(page.getByRole('button',{name:'Reset map',exact:true})).toHaveCount(0);
+         |                                                     ^
+      84 |  await page.locator('.navigation-heading').click();await page.getByRole('button',{name:'DestinaZ%�ie pe hart%�',exact:true}).click();await expect(page.locator('.pin-prompt')).toBeVisible();await page.getByTestId('map-canvas').click({position:{x:180,y:300}});await expect(page.locator('.pin-prompt')).toHaveCount(0);await expect(page.getByRole('textbox',{name:'DestinaZ%�ie',exact:true})).toHaveValue(/\d+\.\d+, \d+\.\d+/);await expect(page.getByLabel('Selected map pin')).toBeVisible();
+      85 |  // Real POI glyphs are clickable on the map. Open one using its rendered feature location.
+      86 |  await page.locator('.route-collapse').click();await expect(page.locator('.local-news-sheet')).toBeVisible();await page.getByRole('button',{name:'Nearby fuel',exact:true}).click();await page.getByRole('button',{name:'Salveaz%� pinul',exact:true}).click();await expect(page.getByRole('button',{name:'Elimin%� pinul',exact:true})).toHaveAttribute('aria-pressed','true');expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('meridian:pinned-pois:v1')??'[]')[0]?.id)).toBe('osm:node:44');await page.screenshot({path:'review-poi-details.png'});await page.locator('.poi-sheet .sheet-close').click();await page.screenshot({path:'review-new-mobile-browse.png'});
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:83:53
+
+    attachment #1: screenshot (image/png) ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+    test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-desktop\test-failed-1.png
+    ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+
+    Error Context: test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ���������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+    test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-desktop\trace.zip
+
+    ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+
+  2 failed
+    [desktop] ��Q% tests\e2e\navigation.spec.ts:34:1 ��Q% shows routing failures without offering GPS for a missing route 
+    [desktop] ��Q% tests\e2e\navigation.spec.ts:80:1 ��Q% uses one GPS control, selects map pins, automatically shows POIs and saves pins 
+  1 passed (3.4m)
+
+
+EXIT 1
+node : (node:10136) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to 
+security vulnerabilities, as the arguments are not escaped, only concatenated.
+At line:1 char:1
++ node runtest17.mjs > r17b.txt 2>&1; echo R17B_DONE
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:10136) [D...y concatenated.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-deprecation ...` to show where the warning was created)

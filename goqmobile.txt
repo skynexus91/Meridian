@@ -1,0 +1,255 @@
+
+Running 43 tests using 1 worker
+
+[1/43] [mobile] › tests\e2e\app.spec.ts:8:1 › live interface, source details and place persistence
+  1) [mobile] › tests\e2e\app.spec.ts:8:1 › live interface, source details and place persistence ───
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('link', { name: 'Meridian home' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('link', { name: 'Meridian home' }) with timeout 5000ms
+      - waiting for getByRole('link', { name: 'Meridian home' })
+
+
+       7 |
+       8 | test('live interface, source details and place persistence',async({page},testInfo)=>{
+    >  9 |  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await expect(page.getByRole('link',{name:'Meridian home'})).toBeVisible();await expect(page.locator('.news-card').first()).toBeVisible({timeout:30000});
+         |                                                                                                                                                           ^
+      10 |  await page.locator('.news-card').first().click();await expect(page.getByRole('dialog',{name:'Event details'})).toBeVisible();await expect(page.getByText('Source timeline')).toBeVisible();await expect(page.locator('.source-timeline a').first()).toHaveAttribute('href',/^https?:/);await page.getByRole('button',{name:'Close event details'}).click();
+      11 |  await page.getByRole('textbox',{name:'Search places'}).fill('Bucuresti');await page.locator('.search-results>button').first().click();
+      12 |  if(testInfo.project.name==='mobile')await page.locator('.mobile-switch').getByRole('button',{name:'List'}).click();
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\app.spec.ts:9:155
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\app-live-interface-source-details-and-place-persistence-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\app-live-interface-source-details-and-place-persistence-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\app-live-interface-source-details-and-place-persistence-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\app-live-interface-source-details-and-place-persistence-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[2/43] [mobile] › tests\e2e\app.spec.ts:17:1 › radio favorites, explicit playback and source health
+  2) [mobile] › tests\e2e\app.spec.ts:17:1 › radio favorites, explicit playback and source health ──
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Side panel', exact: true })
+
+
+      2 | async function openTab(page:Page,name:string){
+      3 |  const navigation=page.getByRole('navigation',{name:'Main navigation'});
+    > 4 |  if(!await navigation.isVisible())await page.getByRole('button',{name:'Side panel',exact:true}).click();
+        |                                                                                                 ^
+      5 |  await navigation.getByRole('button',{name,exact:true}).click();
+      6 | }
+      7 |
+        at openTab (C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\app.spec.ts:4:97)
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\app.spec.ts:17:98
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\app-radio-favorites-explicit-playback-and-source-health-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\app-radio-favorites-explicit-playback-and-source-health-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\app-radio-favorites-explicit-playback-and-source-health-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\app-radio-favorites-explicit-playback-and-source-health-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[3/43] [mobile] › tests\e2e\app.spec.ts:18:1 › weather forecast and satellite controls
+  3) [mobile] › tests\e2e\app.spec.ts:18:1 › weather forecast and satellite controls ───────────────
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Side panel', exact: true })
+
+
+      2 | async function openTab(page:Page,name:string){
+      3 |  const navigation=page.getByRole('navigation',{name:'Main navigation'});
+    > 4 |  if(!await navigation.isVisible())await page.getByRole('button',{name:'Side panel',exact:true}).click();
+        |                                                                                                 ^
+      5 |  await navigation.getByRole('button',{name,exact:true}).click();
+      6 | }
+      7 |
+        at openTab (C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\app.spec.ts:4:97)
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\app.spec.ts:18:166
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\app-weather-forecast-and-satellite-controls-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\app-weather-forecast-and-satellite-controls-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\app-weather-forecast-and-satellite-controls-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\app-weather-forecast-and-satellite-controls-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[4/43] [mobile] › tests\e2e\app.spec.ts:19:1 › responsive layout has no horizontal overflow
+  4) [mobile] › tests\e2e\app.spec.ts:19:1 › responsive layout has no horizontal overflow ──────────
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for locator('.mobile-switch').getByRole('button', { name: 'Map' })
+
+
+      17 | test('radio favorites, explicit playback and source health',async({page})=>{await page.goto('/');await openTab(page,'Radio');await expect(page.getByRole('heading',{name:'On the air'})).toBeVisible();expect(await page.locator('audio').count()).toBe(0);await page.getByRole('button',{name:'Save Europa FM',exact:true}).click();await expect(page.getByRole('button',{name:'Save Europa FM',exact:true})).toHaveAttribute('aria-pressed','true');await page.getByRole('button',{name:'Listen to Europa FM',exact:true}).click();await expect(page.locator('.radio-player')).toContainText('Europa FM');await expect(page.locator('audio')).toHaveAttribute('src',/^https:/);await page.getByRole('button',{name:'Close radio player'}).click();await openTab(page,'Sources');await expect(page.getByRole('heading',{name:'Source health'})).toBeVisible();await expect(page.locator('.source-row').first()).toBeVisible();});
+      18 | test('weather forecast and satellite controls',async({page},testInfo)=>{const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await openTab(page,'Weather');await expect(page.locator('.forecast-main')).toBeVisible({timeout:30000});await expect(page.locator('.imagery-card').first()).toBeVisible({timeout:30000});await page.locator('.imagery-card').first().click();if(testInfo.project.name==='mobile')await page.locator('.mobile-switch').getByRole('button',{name:'Map'}).click();await expect(page.getByRole('slider',{name:'Weather imagery frame'})).toBeVisible();await page.getByRole('button',{name:'Play imagery',exact:true}).click();await expect(page.getByRole('button',{name:'Pause imagery',exact:true})).toBeVisible();await page.getByRole('button',{name:'Pause imagery',exact:true}).click();await page.screenshot({path:`test-results/${testInfo.project.name}-weather.png`,fullPage:true});expect(errors).toEqual([]);});
+    > 19 | test('responsive layout has no horizontal overflow',async({page},testInfo)=>{await page.goto('/');await page.waitForTimeout(1000);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);if(testInfo.project.name==='mobile'){await page.locator('.mobile-switch').getByRole('button',{name:'Map'}).click();await expect(page.locator('[data-testid="map-canvas"]')).toBeVisible();}await page.screenshot({path:`test-results/${testInfo.project.name}-map.png`,fullPage:true});});
+         |                                                                                                                                                                                                                                                                                                                                           ^
+      20 | test('camera cards open the in-app viewer',async({page})=>{await page.goto('/');await openTab(page,'Cameras');await page.locator('.camera-card').first().click();await expect(page.getByRole('dialog',{name:'Camera directory'})).toBeVisible();await page.getByRole('button',{name:'Close camera',exact:true}).click();await expect(page.locator('.camera-modal')).toHaveCount(0);});
+      21 | test('administration remains locked without a valid token',async({page})=>{await page.goto('/');if(!await page.getByRole('button',{name:'Local administration',exact:true}).isVisible())await page.locator('.panel-toggle').click();await page.getByRole('button',{name:'Local administration',exact:true}).click();await expect(page.getByRole('dialog',{name:'Local administration'})).toBeVisible();await page.getByLabel('Administrator token').fill('invalid-token');await page.getByRole('button',{name:'Unlock tools'}).click();await expect(page.locator('.admin-status')).toContainText('Administrator token required');await page.getByRole('button',{name:'Close administration'}).click();});
+      22 | test('malformed saved preferences recover without crashing',async({page})=>{await page.addInitScript(()=>{localStorage.setItem('meridian:language','"invalid-language"');localStorage.setItem('meridian:places','{"corrupted":true}');localStorage.setItem('meridian:stations','null');localStorage.setItem('meridian:lastVisit','not-a-date');});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await expect(page.getByRole('link',{name:'Meridian home'})).toBeVisible();await expect(page.getByRole('combobox',{name:'Interface language'})).toHaveValue('en');await openTab(page,'My places');await expect(page.getByText('Search a city and follow it')).toBeVisible();expect(errors).toEqual([]);});
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\app.spec.ts:19:331
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\app-responsive-layout-has-no-horizontal-overflow-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\app-responsive-layout-has-no-horizontal-overflow-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\app-responsive-layout-has-no-horizontal-overflow-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\app-responsive-layout-has-no-horizontal-overflow-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[5/43] [mobile] › tests\e2e\app.spec.ts:20:1 › camera cards open the in-app viewer
+  5) [mobile] › tests\e2e\app.spec.ts:20:1 › camera cards open the in-app viewer ───────────────────
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Side panel', exact: true })
+
+
+      2 | async function openTab(page:Page,name:string){
+      3 |  const navigation=page.getByRole('navigation',{name:'Main navigation'});
+    > 4 |  if(!await navigation.isVisible())await page.getByRole('button',{name:'Side panel',exact:true}).click();
+        |                                                                                                 ^
+      5 |  await navigation.getByRole('button',{name,exact:true}).click();
+      6 | }
+      7 |
+        at openTab (C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\app.spec.ts:4:97)
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\app.spec.ts:20:81
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\app-camera-cards-open-the-in-app-viewer-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\app-camera-cards-open-the-in-app-viewer-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\app-camera-cards-open-the-in-app-viewer-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\app-camera-cards-open-the-in-app-viewer-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[6/43] [mobile] › tests\e2e\app.spec.ts:21:1 › administration remains locked without a valid token
+  6) [mobile] › tests\e2e\app.spec.ts:21:1 › administration remains locked without a valid token ───
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Local administration', exact: true })
+
+
+      19 | test('responsive layout has no horizontal overflow',async({page},testInfo)=>{await page.goto('/');await page.waitForTimeout(1000);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);if(testInfo.project.name==='mobile'){await page.locator('.mobile-switch').getByRole('button',{name:'Map'}).click();await expect(page.locator('[data-testid="map-canvas"]')).toBeVisible();}await page.screenshot({path:`test-results/${testInfo.project.name}-map.png`,fullPage:true});});
+      20 | test('camera cards open the in-app viewer',async({page})=>{await page.goto('/');await openTab(page,'Cameras');await page.locator('.camera-card').first().click();await expect(page.getByRole('dialog',{name:'Camera directory'})).toBeVisible();await page.getByRole('button',{name:'Close camera',exact:true}).click();await expect(page.locator('.camera-modal')).toHaveCount(0);});
+    > 21 | test('administration remains locked without a valid token',async({page})=>{await page.goto('/');if(!await page.getByRole('button',{name:'Local administration',exact:true}).isVisible())await page.locator('.panel-toggle').click();await page.getByRole('button',{name:'Local administration',exact:true}).click();await expect(page.getByRole('dialog',{name:'Local administration'})).toBeVisible();await page.getByLabel('Administrator token').fill('invalid-token');await page.getByRole('button',{name:'Unlock tools'}).click();await expect(page.locator('.admin-status')).toContainText('Administrator token required');await page.getByRole('button',{name:'Close administration'}).click();});
+         |                                                                                                                                                                                                                                                                                                             ^
+      22 | test('malformed saved preferences recover without crashing',async({page})=>{await page.addInitScript(()=>{localStorage.setItem('meridian:language','"invalid-language"');localStorage.setItem('meridian:places','{"corrupted":true}');localStorage.setItem('meridian:stations','null');localStorage.setItem('meridian:lastVisit','not-a-date');});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await expect(page.getByRole('link',{name:'Meridian home'})).toBeVisible();await expect(page.getByRole('combobox',{name:'Interface language'})).toHaveValue('en');await openTab(page,'My places');await expect(page.getByText('Search a city and follow it')).toBeVisible();expect(errors).toEqual([]);});
+      23 | test('Romanian interface choice persists',async({page})=>{await page.goto('/');await page.getByRole('combobox',{name:'Interface language'}).selectOption('ro');await expect(page.locator('html')).toHaveAttribute('lang','ro');if(!await page.locator('.rail').isVisible())await page.locator('.panel-toggle').click();await expect(page.getByRole('navigation').getByRole('button',{name:'Știri',exact:true})).toBeVisible();await page.reload();await expect(page.getByRole('combobox',{name:'Limba interfeței'})).toHaveValue('ro');});
+      24 | test('news remains usable when map tiles fail',async({page})=>{await page.route('https://tiles.openfreemap.org/**',r=>r.abort());await page.goto('/');await expect(page.locator('.news-card').first()).toBeVisible({timeout:30000});await page.locator('.news-card').first().click();await expect(page.getByRole('dialog',{name:'Event details'})).toBeVisible();await page.getByRole('button',{name:'Close event details'}).click();});
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\app.spec.ts:21:301
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\app-administration-remains-locked-without-a-valid-token-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\app-administration-remains-locked-without-a-valid-token-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\app-administration-remains-locked-without-a-valid-token-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\app-administration-remains-locked-without-a-valid-token-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[7/43] [mobile] › tests\e2e\app.spec.ts:22:1 › malformed saved preferences recover without crashing
+  7) [mobile] › tests\e2e\app.spec.ts:22:1 › malformed saved preferences recover without crashing ──
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('link', { name: 'Meridian home' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('link', { name: 'Meridian home' }) with timeout 5000ms
+      - waiting for getByRole('link', { name: 'Meridian home' })
+
+
+      20 | test('camera cards open the in-app viewer',async({page})=>{await page.goto('/');await openTab(page,'Cameras');await page.locator('.camera-card').first().click();await expect(page.getByRole('dialog',{name:'Camera directory'})).toBeVisible();await page.getByRole('button',{name:'Close camera',exact:true}).click();await expect(page.locator('.camera-modal')).toHaveCount(0);});
+      21 | test('administration remains locked without a valid token',async({page})=>{await page.goto('/');if(!await page.getByRole('button',{name:'Local administration',exact:true}).isVisible())await page.locator('.panel-toggle').click();await page.getByRole('button',{name:'Local administration',exact:true}).click();await expect(page.getByRole('dialog',{name:'Local administration'})).toBeVisible();await page.getByLabel('Administrator token').fill('invalid-token');await page.getByRole('button',{name:'Unlock tools'}).click();await expect(page.locator('.admin-status')).toContainText('Administrator token required');await page.getByRole('button',{name:'Close administration'}).click();});
+    > 22 | test('malformed saved preferences recover without crashing',async({page})=>{await page.addInitScript(()=>{localStorage.setItem('meridian:language','"invalid-language"');localStorage.setItem('meridian:places','{"corrupted":true}');localStorage.setItem('meridian:stations','null');localStorage.setItem('meridian:lastVisit','not-a-date');});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await expect(page.getByRole('link',{name:'Meridian home'})).toBeVisible();await expect(page.getByRole('combobox',{name:'Interface language'})).toHaveValue('en');await openTab(page,'My places');await expect(page.getByText('Search a city and follow it')).toBeVisible();expect(errors).toEqual([]);});
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ^
+      23 | test('Romanian interface choice persists',async({page})=>{await page.goto('/');await page.getByRole('combobox',{name:'Interface language'}).selectOption('ro');await expect(page.locator('html')).toHaveAttribute('lang','ro');if(!await page.locator('.rail').isVisible())await page.locator('.panel-toggle').click();await expect(page.getByRole('navigation').getByRole('button',{name:'Știri',exact:true})).toBeVisible();await page.reload();await expect(page.getByRole('combobox',{name:'Limba interfeței'})).toHaveValue('ro');});
+      24 | test('news remains usable when map tiles fail',async({page})=>{await page.route('https://tiles.openfreemap.org/**',r=>r.abort());await page.goto('/');await expect(page.locator('.news-card').first()).toBeVisible({timeout:30000});await page.locator('.news-card').first().click();await expect(page.getByRole('dialog',{name:'Event details'})).toBeVisible();await page.getByRole('button',{name:'Close event details'}).click();});
+      25 |
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\app.spec.ts:22:492
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\app-malformed-saved-preferences-recover-without-crashing-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\app-malformed-saved-preferences-recover-without-crashing-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\app-malformed-saved-preferences-recover-without-crashing-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\app-malformed-saved-preferences-recover-without-crashing-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+[8/43] [mobile] › tests\e2e\app.spec.ts:23:1 › Romanian interface choice persists

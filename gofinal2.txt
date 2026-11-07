@@ -1,0 +1,18 @@
+
+Running 19 tests using 1 worker
+
+  x   1 [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints (1.5m)
+  ok  2 [desktop] › tests\e2e\navigation.spec.ts:27:1 › keeps information panels mutually exclusive and traffic automatic (10.9s)
+  x   3 [desktop] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route (1.5m)
+  ok  4 [desktop] › tests\e2e\navigation.spec.ts:38:1 › searches full addresses only on request and selects the result (12.6s)
+  ok  5 [desktop] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania (19.1s)
+  ok  6 [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar (16.7s)
+  ok  7 [desktop] › tests\e2e\navigation.spec.ts:52:1 › fits the news window and reads stories inside the app (10.0s)
+  x   8 [desktop] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation (3.0m)
+  ok  9 [desktop] › tests\e2e\navigation.spec.ts:62:1 › explains denied GPS permission without inventing a live position (12.5s)
+  x  10 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h (1.5m)
+  x  11 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph (1.5m)
+  x  12 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph (1.5m)
+  x  13 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback (1.5m)
+  ok 14 [desktop] › tests\e2e\navigation.spec.ts:76:1 › news uses the GPS locality instead of the route destination (15.9s)
+  ok 15 [desktop] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins (22.9s)

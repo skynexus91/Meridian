@@ -1,0 +1,14 @@
+��cmd : ERROR: Input redirection is not supported, exiting the process immediately.
+At line:1 char:1
++ cmd /c start3002.bat > s3.txt 2>&1; echo S3_DONE
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: Input re...ss immediately.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ERROR: Input redirection is not supported, exiting the process immediately.
+BACKEND_STARTED
+
+> meridian-romania@0.1.0 start
+> tsx server/index.ts
+
+Meridian ,%V% Romania API: http://127.0.0.1:3002

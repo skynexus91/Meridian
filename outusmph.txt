@@ -1,0 +1,7 @@
+
+Running 2 tests using 1 worker
+
+  ok 1 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph (7.8s)
+  ok 2 [mobile] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph (18.2s)
+
+  2 passed (29.6s)

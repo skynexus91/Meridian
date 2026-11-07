@@ -1,0 +1,10 @@
+��cmd : ERROR: Input redirection is not supported, exiting the process immediately.
+At line:1 char:1
++ cmd /c restart3002.bat > r3.txt 2>&1; echo RESTART_DONE
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: Input re...ss immediately.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+The process cannot access the file because it is being used by another process.
+ERROR: Input redirection is not supported, exiting the process immediately.
+BACKEND_RESTARTED

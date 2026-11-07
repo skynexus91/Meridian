@@ -1,0 +1,13 @@
+
+Running 19 tests using 1 worker
+
+  x   1 [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints (1.5m)
+  ok  2 [desktop] › tests\e2e\navigation.spec.ts:27:1 › keeps information panels mutually exclusive and traffic automatic (12.0s)
+  x   3 [desktop] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route (1.5m)
+  ok  4 [desktop] › tests\e2e\navigation.spec.ts:38:1 › searches full addresses only on request and selects the result (19.1s)
+  ok  5 [desktop] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania (23.0s)
+  x   6 [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar (3.3m)
+  ok  7 [desktop] › tests\e2e\navigation.spec.ts:52:1 › fits the news window and reads stories inside the app (14.6s)
+  x   8 [desktop] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation (3.4m)
+  ok  9 [desktop] › tests\e2e\navigation.spec.ts:62:1 › explains denied GPS permission without inventing a live position (53.9s)
+  x  10 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h (2.0m)

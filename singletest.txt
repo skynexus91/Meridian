@@ -1,0 +1,70 @@
+
+Running 2 tests using 1 worker
+
+  x  1 [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints (735ms)
+  x  2 [mobile] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints (748ms)
+
+
+  1) [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3002/
+    Call log:
+      - navigating to "http://127.0.0.1:3002/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:3002/
+    Call log:
+      - navigating to "http://127.0.0.1:3002/", waiting until "domcontentloaded"
+
+
+      14 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[],provider:'Google News RSS'},stale:false}}));
+      15 |  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'world-test',name:'World Radio',country:'GB',region:'London',city:'London',genre:'music',url:'https://example.com/',stream:'https://example.com/audio',lat:51.5,lon:0,rights:'test'}]},stale:false}}));
+    > 16 |  await page.goto('/',{waitUntil:'domcontentloaded'});
+         |             ^
+      17 |  await page.locator('.navigation-heading').click();
+      18 | });
+      19 | test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:16:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-mobile\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints 
+    [mobile] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints 

@@ -30,6 +30,7 @@ export function extractArticle(html:string,url:string):Pick<ArticleContent,'titl
   if(text.length<20||/^(citește și|citeste si|foto:|sursa foto:|urmărește-ne|distribuie|abonează-te)/i.test(text))return [];
   return [{kind:el.tagName==='p'?'paragraph' as const:'heading' as const,text}];
  });
+ if(!blocks.length){for(const script of doc('script[type="application/ld+json"]').toArray()){try{const payload=JSON.parse(doc(script).text());const rows=Array.isArray(payload)?payload:payload['@graph']??[payload];for(const row of rows){if(typeof row.articleBody!=='string'||row.isAccessibleForFree===false||row.isAccessibleForFree==='false')continue;const text=load('<div>'+row.articleBody+'</div>').text().trim();if(text.length>100)blocks.push(...text.split(/\n\s*\n/).filter(Boolean).map(text=>({kind:'paragraph' as const,text})));}}catch{/* Ignore unrelated or malformed structured metadata. */}}}
  const unique=blocks.filter((block,index)=>blocks.findIndex(item=>item.kind===block.kind&&item.text===block.text&&('src' in item?item.src:undefined)===('src' in block?block.src:undefined))===index);
 
  return {title,image,blocks:unique,restricted};

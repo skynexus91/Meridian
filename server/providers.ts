@@ -1,3 +1,4 @@
+import {loadForecast} from './forecast.js';
 import {XMLParser} from 'fast-xml-parser';
 import WebSocket from 'ws';
 import {parseCivilianAis,isCivilianShip} from './ais.js';
@@ -22,11 +23,7 @@ export async function getAircraft(){return cached<Observation[]>('aircraft',2000
  }
  return [...new Map(out.map(a=>[a.id,a])).values()];
 });}
-export async function getForecast(lat:number,lon:number){return cached(`forecast:om:v2:${lat.toFixed(2)}:${lon.toFixed(2)}`,600000,async()=>{
- const url=new URL(process.env.OPEN_METEO_API_KEY?'https://customer-api.open-meteo.com/v1/forecast':'https://api.open-meteo.com/v1/forecast');
- url.search=new URLSearchParams({latitude:String(lat),longitude:String(lon),hourly:'temperature_2m,precipitation_probability,precipitation,wind_speed_10m,wind_gusts_10m,weather_code,is_day',current:'temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,is_day',forecast_days:'2',timezone:'UTC',...(process.env.OPEN_METEO_API_KEY?{apikey:process.env.OPEN_METEO_API_KEY}:{})}).toString();
- const {body}=await fetchText(url.href);return {...JSON.parse(body),provider:'Open-Meteo'};
-});}
+export async function getForecast(lat:number,lon:number){return cached(`forecast:world:v4:${lat.toFixed(2)}:${lon.toFixed(2)}`,600000,()=>loadForecast(lat,lon));}
 export async function getCurrentWeather(lat:number,lon:number){return getForecast(lat,lon);}
 const arr=(v:any):any[]=>!v?[]:Array.isArray(v)?v:[v];
 export async function weatherLayers(){const sat=await cached<WeatherLayer[]>('satellite',300000,async()=>{

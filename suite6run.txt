@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ok 1 [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar (18.2s)
+
+  1 passed (19.7s)

@@ -1,0 +1,95 @@
+��
+Running 3 tests using 1 worker
+
+  x  1 [desktop] ��Q% tests\e2e\navigation.spec.ts:34:1 ��Q% shows routing failures without offering GPS for a missing route (1.5m)
+  ok 2 [desktop] ��Q% tests\e2e\navigation.spec.ts:80:1 ��Q% uses one GPS control, selects map pins, automatically shows POIs and saves pins (23.1s)
+  x  3 [desktop] ��Q% tests\e2e\navigation.spec.ts:99:1 ��Q% shows weather for the searched destination and supports voice search plus news read aloud (22.3s)
+
+
+  1) [desktop] ��Q% tests\e2e\navigation.spec.ts:34:1 ��Q% shows routing failures without offering GPS for a missing route 
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Calculeaz%� traseul', exact: true })
+
+
+      33 | });
+      34 | test('shows routing failures without offering GPS for a missing route',async({page})=>{
+    > 35 |  let attempts=0;await page.route('**/api/route?*',r=>{attempts++;return r.fulfill({status:503,json:{error:'Routing temporarily unavailable'}});});await page.getByRole('button',{name:'FoloseZ%�te GPS',exact:true}).click();await page.getByRole('textbox',{name:'DestinaZ%�ie',exact:true}).fill('Ploie');await page.locator('.route-suggestions button').first().click();await page.getByRole('button',{name:'Calculeaz%� traseul',exact:true}).click();await openRouteDock(page);await expect(page.locator('.navigation-panel [role=alert]')).toHaveText('Routing temporarily unavailable');await expect(page.getByRole('button',{name:'PorneZ%�te GPS',exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Calculeaz%� traseul',exact:true}).click();await openRouteDock(page);await expect.poll(()=>attempts).toBe(2);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ^
+      36 | });
+      37 |
+      38 | test('searches full addresses only on request and selects the result',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:35:729
+
+    attachment #1: screenshot (image/png) ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+    test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\test-failed-1.png
+    ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+
+    Error Context: test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ���������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+    test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\trace.zip
+
+    ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+
+  2) [desktop] ��Q% tests\e2e\navigation.spec.ts:99:1 ��Q% shows weather for the searched destination and supports voice search plus news read aloud 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByRole('textbox', { name: 'DestinaZ%�ie', exact: true })
+    Expected: "Oslo Norway"
+    Received: ""
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByRole('textbox', { name: 'DestinaZ%�ie', exact: true }) with timeout 5000ms
+      - waiting for getByRole('textbox', { name: 'DestinaZ%�ie', exact: true })
+        7 %� locator resolved to <input value="" aria-label="DestinaZ%�ie" placeholder="DestinaZ%�ie"/>
+          - unexpected value ""
+
+
+      102 |  const oslo={id:'oslo',name:'Oslo, Norway',region:'Oslo',country:'NO',lat:59.91,lon:10.75,aliases:[]};await page.route('**/api/suggestions?*',r=>r.fulfill({json:{places:[oslo]}}));await page.route('**/api/voice/tts*',r=>r.fulfill({status:503,json:{error:'Speech not available'}}));
+      103 |  // beforeEach already expands the search panel; clicking .navigation-heading here would collapse it.
+    > 104 |  await page.getByRole('button',{name:'Caut%� vocal',exact:true}).click();await expect(page.getByRole('textbox',{name:'DestinaZ%�ie',exact:true})).toHaveValue('Oslo Norway');await page.locator('.route-suggestions button').filter({hasText:'Oslo, Norway'}).click();await page.locator('.panel-toggle').click();await page.locator('.rail>button').filter({hasText:'Meteo'}).click();await expect(page.locator('.world-panel>header')).toContainText('Oslo');await expect(page.locator('.weather-now')).toContainText('12');
+          |                                                                                                                                                ^
+      105 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[{id:'abcdef123456',title:'Local headline',source:'Local paper',at:new Date().toISOString()}]},stale:false}}));await page.route('**/api/world/article/*',r=>r.fulfill({json:{data:{title:'Local headline',source:'Local paper',blocks:[{kind:'paragraph',text:'Public news article text.'}]},stale:false}}));await page.locator('.panel-toggle').click();await page.locator('.rail>button').filter({hasText:'Z%�tiri'}).click();await page.locator('.world-stories button').first().click();await page.getByRole('button',{name:'Ascult%� Z%�tirea',exact:true}).click();await expect.poll(()=>page.evaluate(()=>(window as any).spoken)).toBe('Local headline.');await page.getByRole('button',{name:'Pauz%�',exact:true}).click();await expect(page.getByRole('button',{name:'Continu%�',exact:true})).toBeEnabled();await page.getByRole('button',{name:'OpreZ%�te',exact:true}).click();await expect(page.getByRole('button',{name:'Ascult%� Z%�tirea',exact:true})).toBeEnabled();
+      106 | });
+      107 |
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:104:144
+
+    attachment #1: screenshot (image/png) ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+    test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\test-failed-1.png
+    ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+
+    Error Context: test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ���������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+    test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\trace.zip
+
+    ������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+
+  2 failed
+    [desktop] ��Q% tests\e2e\navigation.spec.ts:34:1 ��Q% shows routing failures without offering GPS for a missing route 
+    [desktop] ��Q% tests\e2e\navigation.spec.ts:99:1 ��Q% shows weather for the searched destination and supports voice search plus news read aloud 
+  1 passed (2.3m)
+
+
+EXIT 1
+node : (node:5584) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to 
+security vulnerabilities, as the arguments are not escaped, only concatenated.
+At line:1 char:1
++ node runtest17.mjs > runtest17out.txt 2>&1; echo R17_DONE
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:5584) [DE...y concatenated.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-deprecation ...` to show where the warning was created)

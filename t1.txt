@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ok 1 [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints (44.9s)
+
+  1 passed (48.5s)

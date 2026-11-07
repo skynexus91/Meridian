@@ -1,3 +1,4 @@
+import {distanceMeters,routeProgress} from './navigation';
 import type {RoutingState} from './routing';
 import {useApi} from './lib';
 import {useTranslation} from './i18n';
@@ -9,7 +10,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type {EarthLayer,OrbitalSatellite,NewsEvent,Place,Observation,WeatherFrame,Camera,Station,POI} from './types';
 import {LocateFixed,Plus,Minus,Map as MapIcon} from 'lucide-react';
 maplibregl.setWorkerUrl(workerUrl);
-interface Props {gps?:{lon:number;lat:number;heading?:number};navigating?:boolean;streetMode:boolean;onReady:(ready:boolean)=>void;routing?:RoutingState;incidentFocus?:Observation;theme:string;earthLayer?:EarthLayer;earthOpacity:number;satellites:OrbitalSatellite[];selectedSatellite:string;onSatellite:(id:string)=>void;roadMode:boolean;forecastPlace?:Place;events:NewsEvent[];places:Place[];country:string;focus?:Place;selected?:string;onSelect:(id:string)=>void;observations:Observation[];onObservation:(o:Observation)=>void;frame?:WeatherFrame;opacity:number;satellite:boolean;cameras:Camera[];stations:Station[];onCamera:(c:Camera)=>void;onStation:(s:Station)=>void;flow?:string;onWeatherReady?:(url:string)=>void;pois:POI[];onPoi:(poi:POI)=>void;baseStyle:'street'|'satellite';googleLayer:'off'|'streets'|'satellite'}
+interface Props {onMapCenter?:(lon:number,lat:number,zoom:number)=>void;pickingPin?:boolean;onMapPin?:(lon:number,lat:number)=>void;mapPin?:Place;gps?:{lon:number;lat:number;heading?:number;accuracy?:number;speed?:number|null};navigating?:boolean;streetMode:boolean;onReady:(ready:boolean)=>void;routing?:RoutingState;incidentFocus?:Observation;theme:string;earthLayer?:EarthLayer;earthOpacity:number;satellites:OrbitalSatellite[];selectedSatellite:string;onSatellite:(id:string)=>void;roadMode:boolean;forecastPlace?:Place;events:NewsEvent[];places:Place[];country:string;focus?:Place;selected?:string;onSelect:(id:string)=>void;observations:Observation[];onObservation:(o:Observation)=>void;frame?:WeatherFrame;opacity:number;satellite:boolean;cameras:Camera[];stations:Station[];onCamera:(c:Camera)=>void;onStation:(s:Station)=>void;flow?:string;onWeatherReady?:(url:string)=>void;pois:POI[];onPoi:(poi:POI)=>void;baseStyle:'street'|'satellite';googleLayer:'off'|'streets'|'satellite';onGps?:()=>void}
 export default function MapView(p:Props){const tr=useTranslation();const element=useRef<HTMLDivElement>(null);const map=useRef<MapType|undefined>(undefined);const googleElement=useRef<HTMLDivElement>(null);const googleMap=useRef<google.maps.Map|undefined>(undefined);const latest=useRef(p);latest.current=p;const [ready,setReady]=useState(false);const [failed,setFailed]=useState(false);const [tileError,setTileError]=useState(false);const [gmapsLoaded,setGmapsLoaded]=useState(false);const [followGps,setFollowGps]=useState(true);
  useEffect(()=>setFollowGps(true),[p.navigating]);
  const site=p.forecastPlace;
@@ -23,15 +24,25 @@ export default function MapView(p:Props){const tr=useTranslation();const element
    return ()=>{marker.remove();};
  },[ready,site,temperature]);
  useEffect(()=>{if(ready&&p.navigating&&!p.gps&&p.routing?.points[0])map.current?.easeTo({center:p.routing.points[0],zoom:18,pitch:40,duration:500});},[ready,p.navigating,p.gps]);
- useEffect(()=>{if(!ready||!p.gps)return;const m=map.current!;
- const el=document.createElement('div');el.className='gps-position';el.setAttribute('aria-label','GPS location');
- const marker=new maplibregl.Marker({element:el}).setLngLat([p.gps.lon,p.gps.lat]).addTo(m);
- if(followGps&&!p.navigating)m.easeTo({center:[p.gps.lon,p.gps.lat],zoom:17,duration:700});
- if(followGps&&p.navigating)m.easeTo({center:[p.gps.lon,p.gps.lat],zoom:18,bearing:p.gps.heading??0,pitch:40,duration:700});
- return()=>{marker.remove();};
+ const gpsMarker=useRef<maplibregl.Marker|undefined>(undefined);const gpsAnimation=useRef(0);const previousGpsAt=useRef(0);
+ useEffect(()=>{if(!ready)return;if(!p.gps){cancelAnimationFrame(gpsAnimation.current);gpsMarker.current?.remove();gpsMarker.current=undefined;previousGpsAt.current=0;return;}const m=map.current!;const raw:[number,number]=[p.gps.lon,p.gps.lat];const progress=p.navigating&&p.routing?.route?routeProgress(raw,p.routing.route.geometry.coordinates):undefined;
+ const segment=progress&&p.routing?.route? p.routing.route.geometry.coordinates.slice(progress.segmentIndex,progress.segmentIndex+2):[];
+ const heading=p.gps.heading;const routeBearing=segment.length===2?Math.atan2((segment[1][0]-segment[0][0])*Math.cos(raw[1]*Math.PI/180),segment[1][1]-segment[0][1])*180/Math.PI:undefined;
+ const agrees=heading!==undefined&&routeBearing!==undefined&&Math.abs(((heading-routeBearing+540)%360)-180)<40;
+ let target=progress&&progress.distance<=(agrees?20:8)&&(p.gps.accuracy??100)<=35?progress.point:raw;
+ if(gpsMarker.current&&p.gps.speed!==null&&p.gps.speed!==undefined&&p.gps.speed<1){const prior=gpsMarker.current.getLngLat();if(distanceMeters([prior.lng,prior.lat],target)<Math.max(6,Math.min(15,p.gps.accuracy??6)))target=[prior.lng,prior.lat];}
+ if(!gpsMarker.current){const el=document.createElement('div');el.className='gps-position';el.setAttribute('aria-label','GPS location');gpsMarker.current=new maplibregl.Marker({element:el}).setLngLat(target).addTo(m);}
+ const marker=gpsMarker.current;marker.getElement().classList.toggle('is-uncertain',(p.gps.accuracy??0)>35);marker.getElement().title=p.gps.accuracy?`GPS ±${Math.round(p.gps.accuracy)} m`:'GPS';const from=marker.getLngLat();const started=performance.now();const duration=previousGpsAt.current?Math.min(1200,Math.max(300,started-previousGpsAt.current)):0;previousGpsAt.current=started;cancelAnimationFrame(gpsAnimation.current);
+ const animate=(at:number)=>{const t=duration?Math.min(1,(at-started)/duration):1;marker.setLngLat([from.lng+(target[0]-from.lng)*t,from.lat+(target[1]-from.lat)*t]);if(t<1)gpsAnimation.current=requestAnimationFrame(animate);};gpsAnimation.current=requestAnimationFrame(animate);
+ if(followGps){const heading=p.gps.heading;const headingDelta=heading===undefined?0:Math.abs(((heading-m.getBearing()+540)%360)-180);const bearing=p.navigating&&heading!==undefined&&(p.gps.speed??0)>2&&headingDelta>8?heading:m.getBearing();m.easeTo({center:target,zoom:p.navigating?18:17,bearing,pitch:p.navigating?40:0,duration:Math.max(500,duration),essential:true});}
+ return()=>cancelAnimationFrame(gpsAnimation.current);
  },[ready,p.gps,p.navigating,followGps,p.routing?.route]);
+ useEffect(()=>()=>{cancelAnimationFrame(gpsAnimation.current);gpsMarker.current?.remove();gpsMarker.current=undefined;},[]);
+ useEffect(()=>{if(!ready)return;const canvas=map.current!.getCanvas();canvas.style.cursor=p.pickingPin?'crosshair':'';},[ready,p.pickingPin]);
+ useEffect(()=>{if(!ready||!p.mapPin)return;const marker=new maplibregl.Marker({color:'#ec5b4c'}).setLngLat([p.mapPin.lon,p.mapPin.lat]).addTo(map.current!);marker.getElement().setAttribute('aria-label','Selected map pin');marker.getElement().style.pointerEvents='none';return()=>{marker.remove();};},[ready,p.mapPin]);
  useEffect(()=>{if(!element.current)return;let m:MapType;try{m=new maplibregl.Map({container:element.current,center:[29,47.3],zoom:4.8,minZoom:1,maxZoom:19,attributionControl:{compact:true},style:{version:8,glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',sources:{osm:{type:'raster',tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],tileSize:256,maxzoom:19,attribution:'© OpenStreetMap contributors'}},layers:[{id:'osm',type:'raster',source:'osm'}]}});map.current=m;}catch{setFailed(true);return;}
- m.on('dragstart',()=>setFollowGps(false));m.on('moveend',()=>{if(element.current)element.current.dataset.zoom=m.getZoom().toFixed(2);});m.once('style.load',()=>{
+ m.on('click',e=>{if(latest.current.pickingPin)latest.current.onMapPin?.(e.lngLat.lng,e.lngLat.lat);});
+ m.on('dragstart',()=>setFollowGps(false));m.on('moveend',()=>{const center=m.getCenter();latest.current.onMapCenter?.(center.lng,center.lat,m.getZoom());if(element.current)element.current.dataset.zoom=m.getZoom().toFixed(2);});m.once('style.load',()=>{
   m.addSource('earth',{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:18,attribution:'Imagery © Esri, Maxar, Earthstar Geographics, GIS User Community'});
   
   m.addSource('cities',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
@@ -68,8 +79,9 @@ export default function MapView(p:Props){const tr=useTranslation();const element
  useEffect(()=>{if(!ready)return;const m=map.current!;const fc=(items:any[])=>({type:'FeatureCollection' as const,features:items.map(o=>({type:'Feature' as const,geometry:{type:'Point' as const,coordinates:[o.lon,o.lat]},properties:o}))});
  (m.getSource('events') as GeoJSONSource).setData(fc(p.events.filter(e=>e.place).map(e=>({id:e.id,category:e.category,lon:e.place!.lon,lat:e.place!.lat}))));
  (m.getSource('cities') as GeoJSONSource).setData(fc(p.places));
- (m.getSource('traffic') as GeoJSONSource).setData(fc(p.observations.filter(o=>o.kind!=='road')));(m.getSource('cameras') as GeoJSONSource).setData(fc(p.cameras.filter(c=>Number.isFinite(c.lat)&&Number.isFinite(c.lon))));(m.getSource('stations') as GeoJSONSource).setData(fc(p.stations));(m.getSource('pois') as GeoJSONSource).setData(fc(p.pois.map(o=>({...o,icon:o.type==='fuel'?'⛽':o.type==='hotel'?'🏨':o.type==='motel'?'🏨':o.type==='pension'?'🏨':o.type==='tourist'?'📍':o.type==='traffic'?'⚠️':'📍'}))));
+ (m.getSource('traffic') as GeoJSONSource).setData(fc(p.observations.filter(o=>o.kind!=='road')));(m.getSource('cameras') as GeoJSONSource).setData(fc(p.cameras.filter(c=>Number.isFinite(c.lat)&&Number.isFinite(c.lon))));(m.getSource('stations') as GeoJSONSource).setData(fc(p.stations));(m.getSource('pois') as GeoJSONSource).setData(fc(p.pois.map(o=>({...o,icon:o.type==='restaurant'?'🍴':o.type==='parking'?'P':o.type==='fuel'?'⛽':o.type==='hotel'?'🏨':o.type==='motel'?'🏨':o.type==='pension'?'🏨':o.type==='tourist'?'📍':o.type==='traffic'?'⚠️':'📍'}))));
  },[ready,p.places,p.events,p.observations,p.cameras,p.stations,p.pois]);
+ useEffect(()=>{if(!ready)return;const m=map.current!;m.setLayoutProperty('pois','visibility','none');const markers=p.pois.slice(0,60).map(poi=>{const button=document.createElement('button');button.className='poi-marker';button.setAttribute('aria-label',poi.name);button.title=poi.name;button.textContent=poi.type==='fuel'?'⛽':poi.type==='restaurant'?'🍴':poi.type==='parking'?'P':['hotel','motel','pension'].includes(poi.type)?'H':'📍';button.addEventListener('click',event=>{if(latest.current.pickingPin)return;event.stopPropagation();latest.current.onPoi(poi);});return new maplibregl.Marker({element:button}).setLngLat([poi.lon,poi.lat]).addTo(m);});return()=>markers.forEach(marker=>marker.remove());},[ready,p.pois]);
  useEffect(()=>{if(!ready)return;const m=map.current!;if(latest.current.navigating||p.gps&&(!p.focus||p.focus.id==='gps'))return;if(p.focus)m.flyTo({center:[p.focus.lon,p.focus.lat],zoom:13,duration:900});else m.fitBounds([[20.2,43.5],[29.8,48.4]],{padding:50,duration:900});},[ready,p.country,p.focus]);
  useEffect(()=>{if(!ready)return;const m=map.current!;if(m.getLayer('satellite'))m.removeLayer('satellite');if(m.getSource('satellite'))m.removeSource('satellite');m.setLayoutProperty('osm','visibility',p.baseStyle==='satellite'?'none':'visible');if(p.baseStyle==='satellite'){m.addSource('satellite',{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:19,attribution:'Imagery © Esri'});m.addLayer({id:'satellite',type:'raster',source:'satellite'},'clusters');}},[ready,p.baseStyle]);
  useEffect(()=>{if(!ready)return;const m=map.current!;
@@ -130,7 +142,7 @@ export default function MapView(p:Props){const tr=useTranslation();const element
   
   m.setPaintProperty('cities','text-color',p.streetMode&&p.theme!=='dark'?'#35434a':'#e7efdf');
   m.setPaintProperty('cities','text-halo-color',p.streetMode&&p.theme!=='dark'?'#ffffff':'#20342f');
-  for(const id of ['clusters','cluster-count','events-points','events-glow'])m.setLayoutProperty(id,'visibility','visible');
+  for(const id of ['clusters','cluster-count','events-points','events-glow'])m.setLayoutProperty(id,'visibility','none');
   m.setPaintProperty('osm','raster-saturation',p.theme==='dark'?-.6:0);m.setPaintProperty('osm','raster-brightness-max',p.theme==='dark'?.45:1);
  },[ready,p.roadMode,p.streetMode,p.theme]);
  useEffect(()=>{if(ready&&p.incidentFocus?.kind==='road')map.current?.flyTo({center:[p.incidentFocus.lon,p.incidentFocus.lat],zoom:8,duration:500});},[ready,p.incidentFocus?.id]);
@@ -144,18 +156,18 @@ export default function MapView(p:Props){const tr=useTranslation();const element
   }
   const route=p.routing?.enabled?p.routing.route:undefined;
   (m.getSource('driving-route') as GeoJSONSource).setData({type:'FeatureCollection',features:route?[{type:'Feature',properties:{},geometry:route.geometry}]:[]});
-  const markers=(p.routing?.enabled?p.routing.points:[]).map((point,index)=>{
+  const markers=(p.routing?.enabled?p.routing.points:[]).flatMap((point,index)=>{if(p.navigating&&index===0)return [];
    const label=document.createElement('span');label.className='route-point';label.textContent=index===0?'A':'B';label.setAttribute('aria-label',index===0?'Plecare':'Destinație');
-   return new maplibregl.Marker({element:label}).setLngLat(point).addTo(m);
+   return [new maplibregl.Marker({element:label}).setLngLat(point).addTo(m)];
   });
   if(route&&!latest.current.navigating){
    const bounds=new maplibregl.LngLatBounds();
    route.geometry.coordinates.forEach(point=>bounds.extend([point[0],point[1]]));
-   m.fitBounds(bounds,{padding:window.innerWidth>800?{top:110,left:410,right:80,bottom:80}:{top:340,left:35,right:55,bottom:130},duration:600,maxZoom:14});
+   m.fitBounds(bounds,{padding:window.innerWidth>800?{top:110,left:410,right:80,bottom:80}:{top:130,left:35,right:55,bottom:230},duration:600,maxZoom:14});
   }
   return ()=>{markers.forEach(marker=>marker.remove());};
- },[ready,p.routing?.enabled,p.routing?.points,p.routing?.route]);
+ },[ready,p.navigating,p.routing?.enabled,p.routing?.points,p.routing?.route]);
  useEffect(()=>{if(!ready)return;const m=map.current!;if(m.getLayer('road-flow'))m.removeLayer('road-flow');if(m.getSource('road-flow'))m.removeSource('road-flow');if(p.flow){m.addSource('road-flow',{type:'raster',tiles:[p.flow],tileSize:256,attribution:'© TomTom Traffic'});m.addLayer({id:'road-flow',type:'raster',source:'road-flow',paint:{'raster-opacity':.8}},'clusters');}},[ready,p.flow]);
    const isGmap=p.googleLayer!=='off';
-  return <div className="map-wrap">{isGmap?<div ref={googleElement} className="map-canvas" style={{width:'100%',height:'100%'}}/>:<div ref={element} className="map-canvas" data-testid="map-canvas"/>}{failed&&<div className="map-failure"><MapIcon/><h3>{tr("Map graphics unavailable")}</h3><p>{tr("Your browser needs WebGL. News, weather and radio remain available in the side panel.")}</p></div>}<div className="map-controls">{isGmap ? (p.gps&&<button aria-label={tr("Follow GPS")} aria-pressed={followGps} onClick={()=>{setFollowGps(true);if(p.gps)googleMap.current?.panTo({lat:p.gps.lat,lng:p.gps.lon});}}><LocateFixed size={17}/></button>) : (p.gps&&<button aria-label={tr("Follow GPS")} aria-pressed={followGps} onClick={()=>{setFollowGps(true);if(p.gps)map.current?.easeTo({center:[p.gps.lon,p.gps.lat],zoom:p.navigating?18:17,bearing:p.gps.heading??0,duration:500});}}><LocateFixed size={17}/></button>)}<button aria-label={tr("Zoom in")} onClick={isGmap?()=>googleMap.current?.setZoom((googleMap.current?.getZoom()??7)+1):()=>map.current?.zoomIn()}><Plus size={17}/></button><button aria-label={tr("Zoom out")} onClick={isGmap?()=>googleMap.current?.setZoom((googleMap.current?.getZoom()??7)-1):()=>map.current?.zoomOut()}><Minus size={17}/></button><button aria-label={tr("Reset map")} onClick={isGmap?()=>{googleMap.current?.setCenter({lat:46,lng:25});googleMap.current?.setZoom(7);}:()=>{if(p.gps){setFollowGps(true);map.current?.easeTo({center:[p.gps.lon,p.gps.lat],zoom:p.navigating?18:17,duration:500});}else if(p.focus){map.current?.flyTo({center:[p.focus.lon,p.focus.lat],zoom:14});}else map.current?.easeTo({center:[0,20],zoom:2});}}><LocateFixed size={17}/></button></div>{tileError&&<div className="tile-notice">{tr("Some map imagery could not load. Data panels remain available.")}</div>}{!isGmap&&<div className="map-key"><span><i className="dot mint"/>{tr("News")}</span><span><i className="dot peach"/>{tr("War & humanitarian")}</span><span><i className="dot blue"/>{tr("Weather")}</span></div>}</div>;
+  return <div className="map-wrap">{isGmap?<div ref={googleElement} className="map-canvas" style={{width:'100%',height:'100%'}}/>:<div ref={element} className="map-canvas" data-testid="map-canvas"/>}{failed&&<div className="map-failure"><MapIcon/><h3>{tr("Map graphics unavailable")}</h3><p>{tr("Your browser needs WebGL. News, weather and radio remain available in the side panel.")}</p></div>}<div className="map-controls"><button aria-label={tr("Follow GPS")} aria-pressed={followGps} onClick={()=>{setFollowGps(true);if(p.gps)map.current?.easeTo({center:[p.gps.lon,p.gps.lat],zoom:p.navigating?18:17,duration:500});else p.onGps?.();}}><LocateFixed size={17}/></button><button aria-label={tr("Zoom in")} onClick={()=>map.current?.zoomIn()}><Plus size={17}/></button><button aria-label={tr("Zoom out")} onClick={()=>map.current?.zoomOut()}><Minus size={17}/></button></div>{tileError&&<div className="tile-notice">{tr("Some map imagery could not load. Data panels remain available.")}</div>}</div>;
 }

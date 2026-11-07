@@ -1,0 +1,78 @@
+
+Running 3 tests using 1 worker
+
+  x  1 [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar (29.6s)
+  ok 2 [desktop] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation (47.2s)
+  x  3 [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud (19.4s)
+
+
+  1) [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar 
+
+    Error: Timeout 5000ms exceeded while waiting on the predicate
+
+      47 | test('keeps route search inline and remembers a moved toolbar',async({page})=>{test.setTimeout(180000);
+      48 |  const header=page.locator('.topbar');const brand=await page.locator('.panel-toggle').boundingBox();const fields=await page.locator('.route-fields').boundingBox();expect(brand).not.toBeNull();expect(fields).not.toBeNull();expect(Math.abs((brand!.y+brand!.height/2)-(fields!.y+fields!.height/2))).toBeLessThan(12);
+    > 49 |  const before=await header.boundingBox();const handle=page.locator('.toolbar-drag');const rect=await handle.boundingBox();await page.mouse.move(rect!.x+rect!.width/2,rect!.y+rect!.height/2);await page.mouse.down();await page.mouse.move(rect!.x+rect!.width/2,rect!.y+rect!.height/2+110,{steps:8});await page.mouse.up();const moved=await header.boundingBox();expect(moved!.y-before!.y).toBeGreaterThan(80);await page.reload({waitUntil:'domcontentloaded'});await expect.poll(async()=>Math.round((await header.boundingBox())!.y)).toBe(Math.round(moved!.y));expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ^
+      50 | });
+      51 |
+      52 | test('fits the news window and reads stories inside the app',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:49:527
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByRole('textbox', { name: 'Destinație', exact: true })
+    Expected: "Oslo Norway"
+    Received: ""
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByRole('textbox', { name: 'Destinație', exact: true }) with timeout 5000ms
+      - waiting for getByRole('textbox', { name: 'Destinație', exact: true })
+        11 × locator resolved to <input value="" aria-label="Destinație" placeholder="Destinație"/>
+           - unexpected value ""
+
+
+      102 |  const oslo={id:'oslo',name:'Oslo, Norway',region:'Oslo',country:'NO',lat:59.91,lon:10.75,aliases:[]};await page.route('**/api/suggestions?*',r=>r.fulfill({json:{places:[oslo]}}));
+      103 |  // beforeEach already expands the search panel; clicking .navigation-heading here would collapse it.
+    > 104 |  await page.getByRole('button',{name:'Caută vocal',exact:true}).click();await expect(page.getByRole('textbox',{name:'Destinație',exact:true})).toHaveValue('Oslo Norway');await page.locator('.route-suggestions button').filter({hasText:'Oslo, Norway'}).click();await page.locator('.panel-toggle').click();await page.locator('.rail>button').filter({hasText:'Meteo'}).click();await expect(page.locator('.world-panel>header')).toContainText('Oslo');await expect(page.locator('.weather-now')).toContainText('12');
+          |                                                                                                                                                ^
+      105 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[{id:'abcdef123456',title:'Local headline',source:'Local paper',at:new Date().toISOString()}]},stale:false}}));await page.route('**/api/world/article/*',r=>r.fulfill({json:{data:{title:'Local headline',source:'Local paper',blocks:[{kind:'paragraph',text:'Public news article text.'}]},stale:false}}));await page.locator('.panel-toggle').click();await page.locator('.rail>button').filter({hasText:'Știri'}).click();await page.locator('.world-stories button').first().click();await page.getByRole('button',{name:'Ascultă știrea',exact:true}).click();await expect.poll(()=>page.evaluate(()=>(window as any).spoken)).toBe('Local headline.');await page.getByRole('button',{name:'Pauză',exact:true}).click();await expect(page.getByRole('button',{name:'Continuă',exact:true})).toBeEnabled();await page.getByRole('button',{name:'Oprește',exact:true}).click();await expect(page.getByRole('button',{name:'Ascultă știrea',exact:true})).toBeEnabled();
+      106 | });
+      107 |
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:104:144
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar 
+    [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud 
+  1 passed (1.7m)

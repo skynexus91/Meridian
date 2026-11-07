@@ -2,15 +2,15 @@ import type {RoutePoint,RouteStep} from './types';
 const R=6371000;
 export function distanceMeters(a:RoutePoint,b:RoutePoint){const lat=(a[1]+b[1])*Math.PI/360;return Math.hypot((a[0]-b[0])*Math.cos(lat),a[1]-b[1])*Math.PI/180*R;}
 export function routeProgress(point:RoutePoint,coordinates:number[][]){
- let nearest=Infinity,travelled=0,progress=0,total=0;
+ let nearest=Infinity,travelled=0,progress=0,total=0;let snapped:RoutePoint=point;let segmentIndex=0;
  for(let i=1;i<coordinates.length;i++){
   const a=coordinates[i-1] as RoutePoint,b=coordinates[i] as RoutePoint;
   const scale=Math.cos(point[1]*Math.PI/180);const ax=(a[0]-point[0])*scale,ay=a[1]-point[1],dx=(b[0]-a[0])*scale,dy=b[1]-a[1];
   const t=Math.max(0,Math.min(1,-(ax*dx+ay*dy)/(dx*dx+dy*dy||1)));const distance=Math.hypot(ax+t*dx,ay+t*dy)*Math.PI/180*R;const length=distanceMeters(a,b);
-  if(distance<nearest){nearest=distance;progress=travelled+t*length;}
+  if(distance<nearest){nearest=distance;segmentIndex=i-1;progress=travelled+t*length;snapped=[a[0]+t*(b[0]-a[0]),a[1]+t*(b[1]-a[1])];}
   travelled+=length;total+=length;
  }
- return {distance:nearest,remaining:Math.max(0,total-progress),fraction:total?progress/total:0};
+ return {point:snapped,segmentIndex,distance:nearest,remaining:Math.max(0,total-progress),fraction:total?progress/total:0};
 }
 export function maneuverLabel(step:RouteStep|undefined,ro:boolean){
  if(!step)return ro?'Urmărește traseul pe hartă':'Follow the route on the map';

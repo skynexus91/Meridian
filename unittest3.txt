@@ -1,0 +1,37 @@
+
+> meridian-romania@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 C:/Users/skynexus/Documents/gods eye view romania
+
+ ❯ tests/voice.test.ts (2 tests | 1 failed) 9ms
+     × maps each worldwide language family to a calm neural voice 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/voice.test.ts > voice selection > maps each worldwide language family to a calm neural voice
+AssertionError: expected 'en-US-AnaNeural' to match /^[a-z]{2}-[A-Z0-9-]+-Neural$/
+
+- Expected:
+/^[a-z]{2}-[A-Z0-9-]+-Neural$/
+
++ Received:
+"en-US-AnaNeural"
+
+ ❯ tests/voice.test.ts:6:28
+      4|  it('maps each worldwide language family to a calm neural voice',()=>{
+      5|   for(const lang of ['en','ro','de','fr','zh','ar','hi','ja','pt','ru'…
+      6|    expect(pickVoice(lang)).toMatch(/^[a-z]{2}-[A-Z0-9-]+-Neural$/);
+       |                            ^
+      7|  });
+      8|  it('falls back to English when the language is unknown or regional',(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 20 passed (21)
+      Tests  1 failed | 95 passed (96)
+   Start at  19:44:15
+   Duration  16.31s (transform 964ms, setup 0ms, import 8.39s, tests 1.14s, environment 4ms)
+

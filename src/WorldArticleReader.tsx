@@ -1,3 +1,4 @@
+import ReadAloud from './ReadAloud';
 import {ArrowLeft,LoaderCircle} from 'lucide-react';
 import {ago,useApi} from './lib';
 import type {ArticleContent} from './types';
@@ -10,7 +11,7 @@ export default function WorldArticleReader(p:Props){
  {article?.image&&<img className="world-reader-image" src={article.image} alt="" referrerPolicy="no-referrer" onError={e=>e.currentTarget.hidden=true}/>}
  {article?.restricted&&<p className="reader-notice">{ro?'Editorul restricționează articolul. Este afișat doar conținutul public.':'The publisher restricts this article. Only public content is shown.'}</p>}
  {article?.summaryOnly&&<p className="reader-notice">{ro?'Textul integral nu este disponibil în cititorul aplicației pentru această știre. Mai jos este rezumatul disponibil în flux.':'Full article text is not available in the in-app reader for this story. The available feed summary is shown below.'}</p>}
- <div className="article-body">{article?.blocks.map((block,index)=>block.kind==='heading'?<h2 key={index}>{block.text}</h2>:block.kind==='image'?<figure key={index}><img src={block.src} alt={block.text} loading="lazy" referrerPolicy="no-referrer" onError={e=>e.currentTarget.hidden=true}/><figcaption>{block.text}</figcaption></figure>:<p key={index}>{block.text}</p>)}</div>
+ <ReadAloud language={p.language} text={[article?.title??p.title,...(article?.blocks.filter(block=>block.kind!=='image').map(block=>block.text)??[])].join('. ')}/><div className="article-body">{article?.blocks.map((block,index)=>block.kind==='heading'?<h2 key={index}>{block.text}</h2>:block.kind==='image'?<figure key={index}><img src={block.src} alt={block.text} loading="lazy" referrerPolicy="no-referrer" onError={e=>e.currentTarget.hidden=true}/><figcaption>{block.text}</figcaption></figure>:<p key={index}>{block.text}</p>)}</div>
  {article&&<p className="world-credit">{ro?'Sursă':'Source'} · {article.source||p.source||'Original publisher'}{result.data?.stale?' · '+(ro?'copie salvată':'saved copy'):''}</p>}
  </article>;
 }

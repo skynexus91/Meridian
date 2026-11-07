@@ -1,0 +1,2 @@
+SyntaxError: Invalid regular expression: /route\/gi: \ at end of pattern
+

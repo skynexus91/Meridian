@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ok 1 [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud (30.0s)
+
+  1 passed (31.3s)

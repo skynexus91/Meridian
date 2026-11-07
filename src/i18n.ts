@@ -40,7 +40,7 @@ const words:Record<string,string>={
  'PUBLIC CAMERA DISCOVERY':'CAMERE PUBLICE', 'PUBLIC EMBED':'PLAYER PUBLIC', 'Camera directory':'Catalog de camere',
  'Approximate locality · provider player':'Localitate aproximativă · playerul furnizorului', 'Open camera':'Deschide camera', 'Open source & player':'Deschide sursa și playerul',
  'Close camera':'Închide camera', 'TRANSPARENCY FIRST':'TRANSPARENȚĂ ÎNAINTE DE TOATE', 'responding':'active',
- 'listed sources':'surse listate', 'Feed health is connectivity, not an endorsement or a claim of independent verification. Local evaluation uses headlines and original links.':'Starea fluxului indică accesibilitatea, nu o recomandare sau verificare independentă. Evaluarea locală folosește titluri și legături originale.', 'Layer availability':'Disponibilitatea straturilor', 'Map layer':'Stratul hărții', 'Google map basemap':'Harta de bază Google', 'Off':'Închis',
+ 'listed sources':'surse listate', 'Feed health is connectivity, not an endorsement or a claim of independent verification. Local evaluation uses headlines and original links.':'Starea fluxului indică accesibilitatea, nu o recomandare sau verificare independentă. Evaluarea locală folosește titluri și legături originale.', 'Layer availability':'Disponibilitatea straturilor', 'Map layer':'Stratul hărții', 'Google map basemap':'Harta de bază Google', 'Off':'Închis', 'Near you':'Lângă tine',
  'Provider':'Furnizor', 'Event details':'Detalii despre eveniment', 'Event unavailable':'Eveniment indisponibil',
  'Close event details':'Închide detaliile evenimentului', 'Updated':'Actualizat', 'Share event':'Distribuie evenimentul',
  'Source timeline':'Cronologia surselor', 'report':'raport', 'reports':'rapoarte',

@@ -1,0 +1,392 @@
+
+Running 19 tests using 1 worker
+
+  x   1 [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints (1.7m)
+  ok  2 [desktop] › tests\e2e\navigation.spec.ts:27:1 › keeps information panels mutually exclusive and traffic automatic (16.2s)
+  x   3 [desktop] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route (1.5m)
+  ok  4 [desktop] › tests\e2e\navigation.spec.ts:38:1 › searches full addresses only on request and selects the result (13.8s)
+  ok  5 [desktop] › tests\e2e\navigation.spec.ts:43:1 › autocomplete and manual information search work outside Romania (40.6s)
+  x   6 [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar (3.4m)
+  ok  7 [desktop] › tests\e2e\navigation.spec.ts:52:1 › fits the news window and reads stories inside the app (12.6s)
+  x   8 [desktop] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation (3.0m)
+  ok  9 [desktop] › tests\e2e\navigation.spec.ts:62:1 › explains denied GPS permission without inventing a live position (7.4s)
+  x  10 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h (1.6m)
+  x  11 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph (1.6m)
+  x  12 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph (1.8m)
+  x  13 [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback (1.8m)
+  ok 14 [desktop] › tests\e2e\navigation.spec.ts:76:1 › news uses the GPS locality instead of the route destination (31.9s)
+  x  15 [desktop] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins (2.2m)
+  x  16 [desktop] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation (3.4m)
+  x  17 [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud (51.5s)
+  ok 18 [desktop] › tests\e2e\navigation.spec.ts:108:2 › slides the news dock out of view and restores it with its handle (12.8s)
+  ok 19 [desktop] › tests\e2e\navigation.spec.ts:111:2 › searches POI categories from the upper search box (29.1s)
+
+
+  1) [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints 
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Pornește GPS', exact: true })
+
+
+      22 |  await page.getByRole('button',{name:'Folosește GPS',exact:true}).click();await expect(page.getByRole('textbox',{name:'Plecare',exact:true})).toHaveValue('Locația mea');
+      23 |  await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Ploie');await page.locator('.route-suggestions button').first().click();await page.getByRole('button',{name:'Calculează traseul',exact:true}).click();await openRouteDock(page);
+    > 24 |  await expect(page.locator('.navigation-summary')).toContainText('1 h');await page.getByRole('button',{name:'Pornește GPS',exact:true}).click();await expect(page.locator('[data-testid=map-canvas]')).toBeVisible({timeout:30000});await expect(page.locator('.gps-position')).toBeVisible({timeout:30000});await expect(page.locator('.navigation-instruction')).toBeVisible();
+         |                                                                                                                                         ^
+      25 |  await page.getByRole('button',{name:'Oprește GPS',exact:true}).click();await page.locator('.navigation-heading').click();await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Other');await expect(page.locator('.navigation-summary')).toHaveCount(0);await expect(page.getByRole('button',{name:'Calculează traseul',exact:true})).toBeEnabled();expect(errors).toEqual([]);
+      26 | });
+      27 | test('keeps information panels mutually exclusive and traffic automatic',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:24:137
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-plans-a-route-s-6bd23-nvalidates-edited-endpoints-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route 
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Calculează traseul', exact: true })
+
+
+      33 | });
+      34 | test('shows routing failures without offering GPS for a missing route',async({page})=>{
+    > 35 |  let attempts=0;await page.route('**/api/route?*',r=>{attempts++;return r.fulfill({status:503,json:{error:'Routing temporarily unavailable'}});});await page.getByRole('button',{name:'Folosește GPS',exact:true}).click();await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Ploie');await page.locator('.route-suggestions button').first().click();await page.getByRole('button',{name:'Calculează traseul',exact:true}).click();await openRouteDock(page);await expect(page.locator('.navigation-panel [role=alert]')).toHaveText('Routing temporarily unavailable');await expect(page.getByRole('button',{name:'Pornește GPS',exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Calculează traseul',exact:true}).click();await openRouteDock(page);await expect.poll(()=>attempts).toBe(2);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ^
+      36 | });
+      37 |
+      38 | test('searches full addresses only on request and selects the result',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:35:729
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-shows-routing-f-cf6a2-ing-GPS-for-a-missing-route-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: page.reload: Test timeout of 180000ms exceeded.
+    Call log:
+      - waiting for navigation until "domcontentloaded"
+        - navigated to "http://127.0.0.1:3002/"
+
+
+      47 | test('keeps route search inline and remembers a moved toolbar',async({page})=>{test.setTimeout(180000);
+      48 |  const header=page.locator('.topbar');const brand=await page.locator('.panel-toggle').boundingBox();const fields=await page.locator('.route-fields').boundingBox();expect(brand).not.toBeNull();expect(fields).not.toBeNull();expect(Math.abs((brand!.y+brand!.height/2)-(fields!.y+fields!.height/2))).toBeLessThan(12);
+    > 49 |  const before=await header.boundingBox();const handle=page.locator('.toolbar-drag');const rect=await handle.boundingBox();await page.mouse.move(rect!.x+rect!.width/2,rect!.y+rect!.height/2);await page.mouse.down();await page.mouse.move(rect!.x+rect!.width/2,rect!.y+rect!.height/2+110,{steps:8});await page.mouse.up();const moved=await header.boundingBox();expect(moved!.y-before!.y).toBeGreaterThan(80);await page.reload({waitUntil:'domcontentloaded'});await expect.poll(async()=>Math.round((await header.boundingBox())!.y)).toBe(Math.round(moved!.y));expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                ^
+      50 | });
+      51 |
+      52 | test('fits the news window and reads stories inside the app',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:49:416
+
+    Error Context: test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-route-sea-09da8-d-remembers-a-moved-toolbar-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [desktop] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: locator.click: Test timeout of 180000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Pornește GPS', exact: true })
+
+
+      57 |  await context.setGeolocation({latitude:46.56,longitude:23.78,accuracy:5});const oslo={id:'oslo',name:'Oslo, Norway',country:'NO',region:'Oslo',lat:59.9139,lon:10.7522,aliases:[]};const turda={id:'turda',name:'Turda',country:'RO',region:'Cluj',lat:46.56,lon:23.78,aliases:[]};await page.route('**/api/addresses?*',r=>r.fulfill({json:{places:r.request().url().toLowerCase().includes('oslo')?[oslo]:[turda]}}));let routes=0;let resumeReroute:(()=>void)|undefined;
+      58 |  await page.route('**/api/route?*',async r=>{routes++;if(routes===2)await new Promise<void>(resolve=>{resumeReroute=resolve;});const q=new URL(r.request().url()).searchParams;const start=[Number(q.get('startLon')),Number(q.get('startLat'))];return r.fulfill({json:{distance:routes===2?2798000:2797000,duration:130000,provider:'OSRM',calculatedAt:new Date().toISOString(),geometry:{type:'LineString',coordinates:[start,[10.7522,59.9139]]},steps:[]}});});
+    > 59 |  await page.getByRole('textbox',{name:'Plecare',exact:true}).fill('Turda');await page.getByRole('textbox',{name:'Plecare',exact:true}).press('Enter');await expect(page.getByRole('textbox',{name:'Plecare',exact:true})).toHaveValue('Turda');await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Oslo');await page.getByRole('textbox',{name:'Destinație',exact:true}).press('Enter');await expect(page.getByRole('textbox',{name:'Destinație',exact:true})).toHaveValue('Oslo, Norway');await page.getByRole('button',{name:'Calculează traseul',exact:true}).click();await openRouteDock(page);await expect(page.locator('.navigation-summary')).toContainText('2.797 km');await page.getByRole('button',{name:'Pornește GPS',exact:true}).click();await expect.poll(async()=>Number(await page.locator('[data-testid=map-canvas]').getAttribute('data-zoom')),{timeout:60000}).toBeGreaterThanOrEqual(17.9);await context.setGeolocation({latitude:46.58,longitude:23.8,accuracy:5});await page.waitForTimeout(3900);await context.setGeolocation({latitude:46.5801,longitude:23.8001,accuracy:5});await expect.poll(()=>routes,{timeout:15000}).toBeGreaterThanOrEqual(2);try{await expect(page.locator('.navigation-summary')).toBeVisible();await expect(page.locator('.navigation-summary')).toContainText('Se actualizează traseul');}finally{resumeReroute?.();}await expect(page.locator('.navigation-summary')).toContainText('2.798 km');await page.waitForTimeout(1000);await expect.poll(async()=>Number(await page.locator('[data-testid=map-canvas]').getAttribute('data-zoom')),{timeout:15000}).toBeGreaterThanOrEqual(17.9);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ^
+      60 | });
+      61 |
+      62 | test('explains denied GPS permission without inventing a live position',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:59:737
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-resolves-Oslo-w-d973f-ad-zoom-after-recalculation-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h 
+
+    Test timeout of 90000ms exceeded.
+
+    Error: apiRequestContext._wrapApiCall: ENOENT: no such file or directory, copyfile 'C:\Users\skynexus\Documents\gods eye view romania\test-results\.playwright-artifacts-4\traces\5d2868f7d23420c27cca-125196b0fcaa1b954e08-recording3.network' -> 'C:\Users\skynexus\Documents\gods eye view romania\test-results\.playwright-artifacts-4\traces\5d2868f7d23420c27cca-125196b0fcaa1b954e08-recording3-pwnetcopy-1.network'
+
+    Error: browserContext._wrapApiCall: ENOENT: no such file or directory, open 'C:\Users\skynexus\Documents\gods eye view romania\test-results\.playwright-artifacts-4\traces\5d2868f7d23420c27cca-125196b0fcaa1b954e08-recording2.trace'
+
+    Error: locator.click: Test ended.
+    Call log:
+      - waiting for getByRole('button', { name: 'Pornește GPS', exact: true })
+
+
+      71 |   await page.route('**/api/location?*',r=>r.fulfill({json:{place:{id:'gps',name:scenario.country,region:scenario.country,country:scenario.country,lat:scenario.lat,lon:scenario.lon,aliases:[],...(fallback?{road}:{})}}}));await page.route('**/api/speed-roads?*',r=>r.fulfill({json:{data:{roads:fallback?[]:[road]},stale:false}}));
+      72 |   await page.evaluate(config=>{Object.defineProperty(navigator,'geolocation',{configurable:true,value:{watchPosition:(success:(value:unknown)=>void)=>{setTimeout(()=>success({coords:{latitude:config.lat,longitude:config.lon,accuracy:5,speed:20,heading:90},timestamp:Date.now()}),0);return 1;},clearWatch:()=>{}}});},scenario);
+    > 73 |   await page.route('**/api/route?*',r=>r.fulfill({json:{distance:62000,duration:3600,provider:'OSRM',calculatedAt:new Date().toISOString(),geometry:{type:'LineString',coordinates:[[26.1025,44.4268],[26.01,44.94]]},steps:[]}}));await page.getByRole('textbox',{name:'Plecare',exact:true}).fill('București');await page.getByRole('textbox',{name:'Plecare',exact:true}).press('Enter');await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Ploiești');await page.getByRole('textbox',{name:'Destinație',exact:true}).press('Enter');await page.getByRole('button',{name:'Calculează traseul',exact:true}).click();await openRouteDock(page);await page.getByRole('button',{name:'Pornește GPS',exact:true}).click();await expect(page.getByTestId('vehicle-speed')).toHaveText(scenario.speed);await expect(page.getByTestId('speed-unit')).toHaveText(scenario.unit);await expect(page.getByTestId('speed-limit')).toHaveText(scenario.limit);if(scenario.limit!=='—')await expect(page.locator('.vehicle-speed')).toHaveClass(/over-limit/);else await expect(page.locator('.vehicle-speed')).not.toHaveClass(/over-limit/);await expect(page.locator('.vehicle-speed button')).toHaveCount(0);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ^
+      74 |  });
+      75 | }
+      76 | test('news uses the GPS locality instead of the route destination',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:73:707
+
+    Error: ENOENT: no such file or directory, open 'C:\Users\skynexus\Documents\gods eye view romania\test-results\.playwright-artifacts-4\f2984f8a9b4892d78f9d06a8dfd1348f.zip'
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-6ddb5-and-mapped-limit-in-RO-km-h-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph 
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Pornește GPS', exact: true })
+
+
+      71 |   await page.route('**/api/location?*',r=>r.fulfill({json:{place:{id:'gps',name:scenario.country,region:scenario.country,country:scenario.country,lat:scenario.lat,lon:scenario.lon,aliases:[],...(fallback?{road}:{})}}}));await page.route('**/api/speed-roads?*',r=>r.fulfill({json:{data:{roads:fallback?[]:[road]},stale:false}}));
+      72 |   await page.evaluate(config=>{Object.defineProperty(navigator,'geolocation',{configurable:true,value:{watchPosition:(success:(value:unknown)=>void)=>{setTimeout(()=>success({coords:{latitude:config.lat,longitude:config.lon,accuracy:5,speed:20,heading:90},timestamp:Date.now()}),0);return 1;},clearWatch:()=>{}}});},scenario);
+    > 73 |   await page.route('**/api/route?*',r=>r.fulfill({json:{distance:62000,duration:3600,provider:'OSRM',calculatedAt:new Date().toISOString(),geometry:{type:'LineString',coordinates:[[26.1025,44.4268],[26.01,44.94]]},steps:[]}}));await page.getByRole('textbox',{name:'Plecare',exact:true}).fill('București');await page.getByRole('textbox',{name:'Plecare',exact:true}).press('Enter');await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Ploiești');await page.getByRole('textbox',{name:'Destinație',exact:true}).press('Enter');await page.getByRole('button',{name:'Calculează traseul',exact:true}).click();await openRouteDock(page);await page.getByRole('button',{name:'Pornește GPS',exact:true}).click();await expect(page.getByTestId('vehicle-speed')).toHaveText(scenario.speed);await expect(page.getByTestId('speed-unit')).toHaveText(scenario.unit);await expect(page.getByTestId('speed-limit')).toHaveText(scenario.limit);if(scenario.limit!=='—')await expect(page.locator('.vehicle-speed')).toHaveClass(/over-limit/);else await expect(page.locator('.vehicle-speed')).not.toHaveClass(/over-limit/);await expect(page.locator('.vehicle-speed button')).toHaveCount(0);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ^
+      74 |  });
+      75 | }
+      76 | test('news uses the GPS locality instead of the route destination',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:73:707
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-4252f--and-mapped-limit-in-GB-mph-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph 
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Pornește GPS', exact: true })
+
+
+      71 |   await page.route('**/api/location?*',r=>r.fulfill({json:{place:{id:'gps',name:scenario.country,region:scenario.country,country:scenario.country,lat:scenario.lat,lon:scenario.lon,aliases:[],...(fallback?{road}:{})}}}));await page.route('**/api/speed-roads?*',r=>r.fulfill({json:{data:{roads:fallback?[]:[road]},stale:false}}));
+      72 |   await page.evaluate(config=>{Object.defineProperty(navigator,'geolocation',{configurable:true,value:{watchPosition:(success:(value:unknown)=>void)=>{setTimeout(()=>success({coords:{latitude:config.lat,longitude:config.lon,accuracy:5,speed:20,heading:90},timestamp:Date.now()}),0);return 1;},clearWatch:()=>{}}});},scenario);
+    > 73 |   await page.route('**/api/route?*',r=>r.fulfill({json:{distance:62000,duration:3600,provider:'OSRM',calculatedAt:new Date().toISOString(),geometry:{type:'LineString',coordinates:[[26.1025,44.4268],[26.01,44.94]]},steps:[]}}));await page.getByRole('textbox',{name:'Plecare',exact:true}).fill('București');await page.getByRole('textbox',{name:'Plecare',exact:true}).press('Enter');await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Ploiești');await page.getByRole('textbox',{name:'Destinație',exact:true}).press('Enter');await page.getByRole('button',{name:'Calculează traseul',exact:true}).click();await openRouteDock(page);await page.getByRole('button',{name:'Pornește GPS',exact:true}).click();await expect(page.getByTestId('vehicle-speed')).toHaveText(scenario.speed);await expect(page.getByTestId('speed-unit')).toHaveText(scenario.unit);await expect(page.getByTestId('speed-limit')).toHaveText(scenario.limit);if(scenario.limit!=='—')await expect(page.locator('.vehicle-speed')).toHaveClass(/over-limit/);else await expect(page.locator('.vehicle-speed')).not.toHaveClass(/over-limit/);await expect(page.locator('.vehicle-speed button')).toHaveCount(0);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ^
+      74 |  });
+      75 | }
+      76 | test('news uses the GPS locality instead of the route destination',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:73:707
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-c4031--and-mapped-limit-in-US-mph-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback 
+
+    Test timeout of 90000ms exceeded.
+
+    Error: locator.click: Test timeout of 90000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Pornește GPS', exact: true })
+
+
+      71 |   await page.route('**/api/location?*',r=>r.fulfill({json:{place:{id:'gps',name:scenario.country,region:scenario.country,country:scenario.country,lat:scenario.lat,lon:scenario.lon,aliases:[],...(fallback?{road}:{})}}}));await page.route('**/api/speed-roads?*',r=>r.fulfill({json:{data:{roads:fallback?[]:[road]},stale:false}}));
+      72 |   await page.evaluate(config=>{Object.defineProperty(navigator,'geolocation',{configurable:true,value:{watchPosition:(success:(value:unknown)=>void)=>{setTimeout(()=>success({coords:{latitude:config.lat,longitude:config.lon,accuracy:5,speed:20,heading:90},timestamp:Date.now()}),0);return 1;},clearWatch:()=>{}}});},scenario);
+    > 73 |   await page.route('**/api/route?*',r=>r.fulfill({json:{distance:62000,duration:3600,provider:'OSRM',calculatedAt:new Date().toISOString(),geometry:{type:'LineString',coordinates:[[26.1025,44.4268],[26.01,44.94]]},steps:[]}}));await page.getByRole('textbox',{name:'Plecare',exact:true}).fill('București');await page.getByRole('textbox',{name:'Plecare',exact:true}).press('Enter');await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Ploiești');await page.getByRole('textbox',{name:'Destinație',exact:true}).press('Enter');await page.getByRole('button',{name:'Calculează traseul',exact:true}).click();await openRouteDock(page);await page.getByRole('button',{name:'Pornește GPS',exact:true}).click();await expect(page.getByTestId('vehicle-speed')).toHaveText(scenario.speed);await expect(page.getByTestId('speed-unit')).toHaveText(scenario.unit);await expect(page.getByTestId('speed-limit')).toHaveText(scenario.limit);if(scenario.limit!=='—')await expect(page.locator('.vehicle-speed')).toHaveClass(/over-limit/);else await expect(page.locator('.vehicle-speed')).not.toHaveClass(/over-limit/);await expect(page.locator('.vehicle-speed button')).toHaveCount(0);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ^
+      74 |  });
+      75 | }
+      76 | test('news uses the GPS locality instead of the route destination',async({page})=>{
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:73:707
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-automatically-d-0473c-mit-in-GB-mph-road-fallback-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) [desktop] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('.map-controls button')
+    Expected: 3
+    Received: 0
+    Timeout:  60000ms
+
+    Call log:
+      - Expect "toHaveCount" locator('.map-controls button') with timeout 60000ms
+      - waiting for locator('.map-controls button')
+        79 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      81 |  const poi={id:'osm:node:44',name:'Nearby fuel',type:'fuel',city:'București',region:'București',lat:44.427,lon:26.103,rights:'OpenStreetMap'};
+      82 |  await page.route('**/api/pois?*',r=>r.fulfill({json:{pois:[poi]}}));await page.locator('.route-collapse').click();
+    > 83 |  await expect(page.locator('.map-controls button')).toHaveCount(3,{timeout:60000});await expect(page.getByRole('button',{name:'Reset map',exact:true})).toHaveCount(0);
+         |                                                     ^
+      84 |  await page.locator('.navigation-heading').click();await page.getByRole('button',{name:'Destinație pe hartă',exact:true}).click();await expect(page.locator('.pin-prompt')).toBeVisible();await page.getByTestId('map-canvas').click({position:{x:180,y:300}});await expect(page.locator('.pin-prompt')).toHaveCount(0);await expect(page.getByRole('textbox',{name:'Destinație',exact:true})).toHaveValue(/\d+\.\d+, \d+\.\d+/);await expect(page.getByLabel('Selected map pin')).toBeVisible();
+      85 |  // Real POI glyphs are clickable on the map. Open one using its rendered feature location.
+      86 |  await page.locator('.route-collapse').click();await expect(page.locator('.local-news-sheet')).toBeVisible();await page.getByRole('button',{name:'Nearby fuel',exact:true}).click();await page.getByRole('button',{name:'Salvează pinul',exact:true}).click();await expect(page.getByRole('button',{name:'Elimină pinul',exact:true})).toHaveAttribute('aria-pressed','true');expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('meridian:pinned-pois:v1')??'[]')[0]?.id)).toBe('osm:node:44');await page.screenshot({path:'review-poi-details.png'});await page.locator('.poi-sheet .sheet-close').click();await page.screenshot({path:'review-new-mobile-browse.png'});
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:83:53
+
+    Error: apiRequestContext._wrapApiCall: ENOENT: no such file or directory, copyfile 'C:\Users\skynexus\Documents\gods eye view romania\test-results\.playwright-artifacts-8\traces\5d2868f7d23420c27cca-a5fd122ba1c8862bd056-recording3.network' -> 'C:\Users\skynexus\Documents\gods eye view romania\test-results\.playwright-artifacts-8\traces\5d2868f7d23420c27cca-a5fd122ba1c8862bd056-recording3-pwnetcopy-1.network'
+
+    Error: browserContext._wrapApiCall: ENOENT: no such file or directory, open 'C:\Users\skynexus\Documents\gods eye view romania\test-results\.playwright-artifacts-8\traces\5d2868f7d23420c27cca-a5fd122ba1c8862bd056-recording2.network'
+
+    Error: ENOENT: no such file or directory, open 'C:\Users\skynexus\Documents\gods eye view romania\test-results\.playwright-artifacts-8\6ef5d98c7ecc73e57db11dc0891a8c10.zip'
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-uses-one-GPS-co-9d1aa-y-shows-POIs-and-saves-pins-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) [desktop] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: locator.click: Test timeout of 180000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Pornește GPS', exact: true })
+
+
+      92 |  await page.getByRole('textbox',{name:'Plecare',exact:true}).fill('București');await page.getByRole('textbox',{name:'Plecare',exact:true}).press('Enter');await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Ploiești');await page.getByRole('textbox',{name:'Destinație',exact:true}).press('Enter');await page.getByRole('button',{name:'Calculează traseul',exact:true}).click();await openRouteDock(page);await expect(page.locator('.route-fields')).not.toBeVisible();
+      93 |  const bounds=await page.locator('.route-bottom-card').boundingBox();expect(bounds).not.toBeNull();const viewport=page.viewportSize()!;expect(bounds!.y).toBeGreaterThan(viewport.height/2);expect(bounds!.y+bounds!.height).toBeLessThanOrEqual(viewport.height);
+    > 94 |  await page.evaluate(()=>{Object.defineProperty(navigator,'geolocation',{configurable:true,value:{watchPosition:(success:(position:unknown)=>void)=>{(window as any).emitGps=success;return 1;},clearWatch:()=>{}}});});await page.getByRole('button',{name:'Pornește GPS',exact:true}).click();
+         |                                                                                                                                                                                                                                                                                         ^
+      95 |  const emit=async(lon:number,lat:number)=>page.evaluate(({lon,lat})=>(window as any).emitGps({coords:{longitude:lon,latitude:lat,heading:0,accuracy:5,speed:12},timestamp:Date.now()}),{lon,lat});await emit(26.1025,44.44);await expect(page.locator('.gps-position')).toHaveCount(1,{timeout:30000});const marker=await page.locator('.gps-position').evaluate(el=>{(el as HTMLElement).dataset.persistent='yes';return true;});expect(marker).toBe(true);
+      96 |  await emit(26.1125,44.44);await page.waitForTimeout(3900);await emit(26.1126,44.4401);await expect.poll(()=>routes).toBe(2);await expect(page.locator('.gps-position')).toHaveCount(1);await expect(page.locator('.gps-position')).toHaveAttribute('data-persistent','yes');await expect(page.getByTestId('map-canvas')).toHaveAttribute('data-zoom',/^18/);await page.screenshot({path:'review-new-navigation.png'});
+      97 | });
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:94:281
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-keeps-direction-583f4-s-after-sustained-deviation-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByRole('textbox', { name: 'Destinație', exact: true })
+    Expected: "Oslo Norway"
+    Received: ""
+    Timeout:  15000ms
+
+    Call log:
+      - Expect "toHaveValue" getByRole('textbox', { name: 'Destinație', exact: true }) with timeout 15000ms
+      - waiting for getByRole('textbox', { name: 'Destinație', exact: true })
+        16 × locator resolved to <input value="" aria-label="Destinație" placeholder="Destinație"/>
+           - unexpected value ""
+
+
+      102 |  const oslo={id:'oslo',name:'Oslo, Norway',region:'Oslo',country:'NO',lat:59.91,lon:10.75,aliases:[]};await page.route('**/api/suggestions?*',r=>r.fulfill({json:{places:[oslo]}}));await page.route('**/api/voice/tts*',r=>r.fulfill({status:503,json:{error:'Speech not available'}}));
+      103 |  // beforeEach already expands the search panel; clicking .navigation-heading here would collapse it.
+    > 104 |  await page.getByRole('button',{name:'Caută vocal',exact:true}).click();await expect(page.getByRole('textbox',{name:'Destinație',exact:true})).toHaveValue('Oslo Norway',{timeout:15000});await page.locator('.route-suggestions button').filter({hasText:'Oslo, Norway'}).click();await page.locator('.panel-toggle').click();await page.locator('.rail>button').filter({hasText:'Meteo'}).click();await expect(page.locator('.world-panel>header')).toContainText('Oslo');await expect(page.locator('.weather-now')).toContainText('12');
+          |                                                                                                                                                ^
+      105 |  await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[{id:'abcdef123456',title:'Local headline',source:'Local paper',at:new Date().toISOString()}]},stale:false}}));await page.route('**/api/world/article/*',r=>r.fulfill({json:{data:{title:'Local headline',source:'Local paper',blocks:[{kind:'paragraph',text:'Public news article text.'}]},stale:false}}));await page.locator('.panel-toggle').click();await page.locator('.rail>button').filter({hasText:'Știri'}).click();await page.locator('.world-stories button').first().click();await page.getByRole('button',{name:'Ascultă știrea',exact:true}).click();await expect.poll(()=>page.evaluate(()=>(window as any).spoken)).toBe('Local headline.');await page.getByRole('button',{name:'Pauză',exact:true}).click();await expect(page.getByRole('button',{name:'Continuă',exact:true})).toBeEnabled();await page.getByRole('button',{name:'Oprește',exact:true}).click();await expect(page.getByRole('button',{name:'Ascultă știrea',exact:true})).toBeEnabled();
+      106 | });
+      107 |
+        at C:\Users\skynexus\Documents\gods eye view romania\tests\e2e\navigation.spec.ts:104:144
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\navigation-shows-weather-f-2038e-search-plus-news-read-aloud-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11 failed
+    [desktop] › tests\e2e\navigation.spec.ts:19:1 › plans a route, starts GPS, stops and invalidates edited endpoints 
+    [desktop] › tests\e2e\navigation.spec.ts:34:1 › shows routing failures without offering GPS for a missing route 
+    [desktop] › tests\e2e\navigation.spec.ts:47:1 › keeps route search inline and remembers a moved toolbar 
+    [desktop] › tests\e2e\navigation.spec.ts:56:1 › resolves Oslo with Enter and stays at road zoom after recalculation 
+    [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in RO km/h 
+    [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph 
+    [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in US mph 
+    [desktop] › tests\e2e\navigation.spec.ts:69:2 › automatically displays live speed and mapped limit in GB mph road fallback 
+    [desktop] › tests\e2e\navigation.spec.ts:80:1 › uses one GPS control, selects map pins, automatically shows POIs and saves pins 
+    [desktop] › tests\e2e\navigation.spec.ts:89:1 › keeps directions compact at the bottom and automatically reroutes after sustained deviation 
+    [desktop] › tests\e2e\navigation.spec.ts:99:1 › shows weather for the searched destination and supports voice search plus news read aloud 
+  8 passed (29.3m)

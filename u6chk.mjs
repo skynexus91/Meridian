@@ -1,0 +1,1 @@
+const fs=require('fs');let d=fs.readFileSync('unit6.txt','utf8').replace(/\0/g,'');const m=d.match(/Tests\s+(\d+) passed/);fs.writeFileSync('u6chk.txt',m?`${m[0]} of ${d.match(/Test Files\s+\d+ passed/)?.[0]||''}`:'NO_MATCH');
