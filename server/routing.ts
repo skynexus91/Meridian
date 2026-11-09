@@ -30,14 +30,20 @@ async function valhallaRoute(startLon:number,startLat:number,endLon:number,endLa
  const body=JSON.stringify({locations:[{lat:startLat,lon:startLon},{lat:endLat,lon:endLon}],costing:'auto',units:'km'});
  const res=await fetch(VALHALLA_URL+'/route',{method:'POST',headers:{'Content-Type':'application/json'},body,signal:AbortSignal.timeout(15000)});
  if(!res.ok)throw Error('Valhalla HTTP '+res.status);
- const payload=await res.clone().json();
+ const payload=await res.json();
  const trip=payload.trip;if(!trip||trip.status!==0)throw noRoute();
  const summary=trip.summary??{};const lengthKm=summary.length??summary.length_kilometers??0;const timeSec=summary.time??0;
  let geometry:{type:'LineString';coordinates:number[][]}|undefined;
  const shape=trip.legs?.[0]?.shape??trip.shape;
  if(typeof shape==='string'&&shape.length){geometry={type:'LineString',coordinates:decodePolyline(shape,1e6)};}
  if(!geometry||geometry.coordinates.length<2){throw Error('Valhalla route geometry unavailable');}
- return {distance:lengthKm*1000,duration:timeSec,geometry,provider:'Valhalla · OpenStreetMap',calculatedAt:new Date().toISOString()};
+ const steps=(trip.legs?.[0]?.maneuvers??[]).flatMap((maneuver:{type:number;begin_shape_index:number;length:number;instruction?:string;street_names?:string[]})=>{
+  const location=geometry.coordinates[maneuver.begin_shape_index];
+  if(!location||!maneuver.instruction)return [];
+  const type=maneuver.type>=1&&maneuver.type<=3?'depart':maneuver.type>=4&&maneuver.type<=6?'arrive':undefined;
+  return [{location,instruction:maneuver.instruction,type,name:maneuver.street_names?.[0],distance:maneuver.length*1000}];
+ });
+ return {distance:lengthKm*1000,duration:timeSec,geometry,steps,provider:'Valhalla · OpenStreetMap',calculatedAt:new Date().toISOString()};
 }
 async function tomtomRoute(startLon:number,startLat:number,endLon:number,endLat:number):Promise<DrivingRoute>{
  const coordinates=`${startLat},${startLon}:${endLat},${endLon}`;
@@ -55,24 +61,32 @@ async function tomtomRoute(startLon:number,startLat:number,endLon:number,endLat:
  }).filter((step:any)=>Array.isArray(step.location)&&step.location.length===2);
  return {steps,distance:summary.lengthInMeters,duration:summary.travelTimeInSeconds,geometry:{type:'LineString',coordinates:points},provider:'TomTom',calculatedAt:new Date().toISOString()};
 }
-async function osrmRoute(startLon:number,startLat:number,endLon:number,endLat:number):Promise<DrivingRoute>{
+export function isRomanianPeakHour(now:Date){
+ const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Bucharest',weekday:'short',hour:'2-digit',hourCycle:'h23'}).formatToParts(now);
+ const weekday=parts.find(part=>part.type==='weekday')?.value;
+ const hour=Number(parts.find(part=>part.type==='hour')?.value);
+ return weekday!=='Sat'&&weekday!=='Sun'&&((hour>=7&&hour<10)||(hour>=16&&hour<19));
+}
+async function osrmRoute(startLon:number,startLat:number,endLon:number,endLat:number,base='https://router.project-osrm.org',peak=false):Promise<DrivingRoute>{
  const coordinates=startLon+','+startLat+';'+endLon+','+endLat;
- const url='https://router.project-osrm.org/route/v1/driving/'+coordinates+'?overview=full&geometries=geojson&steps=true&alternatives=false';
+ const url=base.replace(/\/$/,'')+'/route/v1/driving/'+coordinates+'?overview=full&geometries=geojson&steps=true&alternatives=false';
  const response=await fetchText(url,{'User-Agent':'Meridian/0.1 (local public routing evaluation)'});
  const payload=JSON.parse(response.body);
  const route=payload.routes?.[0];
  if(payload.code!=='Ok'||!route)throw noRoute();
  if(!Number.isFinite(route.distance)||route.distance<0||!Number.isFinite(route.duration)||route.duration<0||route.geometry?.type!=='LineString'||!Array.isArray(route.geometry.coordinates)||route.geometry.coordinates.length<2)throw Error('Invalid routing provider response');
- return {steps:(route.legs??[]).flatMap((leg:any)=>(leg.steps??[]).map((step:any)=>({type:step.maneuver?.type,modifier:step.maneuver?.modifier,name:step.name,exit:step.maneuver?.exit,instruction:[step.maneuver?.type,step.maneuver?.modifier,step.name].filter(Boolean).join(' · '),location:step.maneuver?.location,distance:step.distance}))).filter((step:any)=>Array.isArray(step.location)&&step.location.length===2),distance:route.distance,duration:route.duration,geometry:route.geometry,provider:'OSRM · OpenStreetMap',calculatedAt:new Date().toISOString()};
+ return {steps:(route.legs??[]).flatMap((leg:any)=>(leg.steps??[]).map((step:any)=>({type:step.maneuver?.type,modifier:step.maneuver?.modifier,name:step.name,exit:step.maneuver?.exit,instruction:[step.maneuver?.type,step.maneuver?.modifier,step.name].filter(Boolean).join(' · '),location:step.maneuver?.location,distance:step.distance}))).filter((step:any)=>Array.isArray(step.location)&&step.location.length===2),distance:route.distance,duration:route.duration,geometry:route.geometry,provider:peak?'OSRM · OpenStreetMap · peak turn weighting':'OSRM · OpenStreetMap',calculatedAt:new Date().toISOString()};
 }
 export async function drivingRoute(query:z.infer<typeof routeQuery>){
- const coordinates=query.startLon+','+query.startLat+';'+query.endLon+','+query.endLat;
+ const peak=process.env.OSRM_PEAK_URL&&inRomania(query.startLon,query.startLat)&&inRomania(query.endLon,query.endLat)&&isRomanianPeakHour(new Date());
+ const coordinates=query.startLon+','+query.startLat+';'+query.endLon+','+query.endLat+(peak?':peak':'');
  const saved=cache.get(coordinates);
  if(saved&&Date.now()-saved.at<3600000)return saved.route;
  const now=Date.now();const wait=Math.max(0,lastRequest+1100-now);lastRequest=now+wait;if(wait)await new Promise(resolve=>setTimeout(resolve,wait));
  let route:DrivingRoute|undefined;let noRouteError:Error|undefined;let lastError:Error|undefined;
  const attempt=async(fn:()=>Promise<DrivingRoute>)=>{try{return await fn();}catch(error){const err=error instanceof Error?error:Error(String(error));if((err as {statusCode?:number}).statusCode===422)noRouteError=err;else lastError=err;return undefined;}};
- if(TOMTOM_API_KEY)route=await attempt(()=>tomtomRoute(query.startLon,query.startLat,query.endLon,query.endLat));
+ if(peak)route=await attempt(()=>osrmRoute(query.startLon,query.startLat,query.endLon,query.endLat,process.env.OSRM_PEAK_URL,true));
+ if(!route&&TOMTOM_API_KEY)route=await attempt(()=>tomtomRoute(query.startLon,query.startLat,query.endLon,query.endLat));
  if(!route&&valhallaConfigured)route=await attempt(()=>valhallaRoute(query.startLon,query.startLat,query.endLon,query.endLat));
  if(!route)route=await attempt(()=>osrmRoute(query.startLon,query.startLat,query.endLon,query.endLat));
  if(!route&&!noRouteError){await new Promise(resolve=>setTimeout(resolve,500));route=await attempt(()=>osrmRoute(query.startLon,query.startLat,query.endLon,query.endLat));}

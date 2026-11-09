@@ -6,7 +6,19 @@ This is a testing gate, not a declaration that every public provider or physical
 
 Install with `npm ci`, then run `npm test` and `npm run build`.
 
-For the local production preview in PowerShell:
+For browser tests of the production build:
+
+```powershell
+npm run test:release
+# To run the broader browser suite:
+npm run test:e2e:prod
+```
+
+Both commands start an isolated server on port 4173 with an in-memory database and the scheduler disabled. Set `TEST_BASE_URL` to use an existing production server. Playwright checks that the target serves the Meridian API and a built entry page before starting browser cases.
+
+Development, production, and release runs each clean their own `test-results/*-artifacts` directory. Keep screenshots you want to retain outside those directories.
+
+For live-provider checks, start a local preview in PowerShell:
 
 ```powershell
 $env:PORT='3002'
@@ -17,11 +29,10 @@ npm start
 Use a separate terminal for:
 
 ```powershell
-npm run test:release
 npm run test:release:live
 ```
 
-`TEST_BASE_URL` overrides the target URL for both release commands. Do not rebuild assets or restart the backend while browser tests are running.
+`TEST_BASE_URL` also overrides the live-provider target. Do not rebuild assets or restart the backend while browser tests are running.
 
 ## What the gates verify
 
@@ -29,7 +40,7 @@ npm run test:release:live
 - `npm run test:release`: the current navigation and release-regression suites on desktop and mobile Chromium. Includes controlled GPS/provider failures, ambiguous same-name destinations in different countries, radio UI and recovery, microphone cancellation, complete article speech and automatic POI markers.
 - `npm run test:release:live`: real weather, radio, POI, news, cross-border routing and neural-speech services across sample countries. It exits nonzero for unavailable, invalid or stale provider results. A legitimate empty POI/news result is not automatically an application defect.
 
-Older `app.spec.ts`, `routing.spec.ts`, `integrated.spec.ts` and `romania.spec.ts` describe the retired observatory UI, including Sources/Cameras/Traffic menus the user explicitly removed. They remain available for historical reference; they are not the current product release gate. This does not turn their failures into passes.
+The broader suite also contains historical assertions about retired observatory controls. Current route preview, nearby browsing, and map inspector cases in that suite are useful for focused regression checks.
 
 ## Manual device scenarios still required
 

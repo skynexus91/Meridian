@@ -5,11 +5,39 @@ async function openTab(page:Page,name:string){
  await navigation.getByRole('button',{name,exact:true}).click();
 }
 
+test('radio waits for a location and uses the selected county when widened',async({page})=>{
+ const place={id:'viisoara',name:'Viișoara',locality:'Viișoara',county:'Cluj',region:'Viișoara',country:'RO',lat:46.55,lon:23.88,aliases:[]};
+ await page.route('**/api/addresses?*',r=>r.fulfill({json:{places:[place]}}));
+ await page.route('**/api/suggestions?*',r=>r.fulfill({json:{places:[]}}));
+ const requests:URL[]=[];
+ await page.route('**/api/world/radio?*',r=>{
+  requests.push(new URL(r.request().url()));
+  return r.fulfill({json:{data:{stations:[]},stale:false}});
+ });
+ await page.goto('/');
+ await openTab(page,'Radio');
+ await expect(page.locator('.radio-scope')).toHaveText('Choose a location for radio');
+ expect(requests).toHaveLength(0);
+ await page.getByRole('textbox',{name:'Information location'}).fill('Viisoara');
+ await page.getByRole('button',{name:'Search area'}).click();
+ await page.getByRole('button',{name:'Viișoara',exact:true}).click();
+ await expect.poll(()=>requests.at(-1)?.searchParams.get('scope')).toBe('location');
+ expect(requests.at(-1)?.searchParams.get('city')).toBe('Viișoara');
+ await expect(page.getByText('No stations in this area. Choose a wider area.')).toBeVisible();
+ await page.getByRole('button',{name:'County',exact:true}).click();
+ await expect.poll(()=>requests.at(-1)?.searchParams.get('scope')).toBe('county');
+ expect(requests.at(-1)?.searchParams.get('region')).toBe('Cluj');
+ await expect(page.locator('.radio-scope')).toHaveText('Cluj');
+});
+
 test('local news opens the in-app article reader',async({page,context},testInfo)=>{
  const place={id:'gps',name:'București',country:'RO',region:'București',lat:44.4268,lon:26.1025,aliases:[]};await context.grantPermissions(['geolocation']);await context.setGeolocation({latitude:place.lat,longitude:place.lon});await page.route('**/api/location?*',r=>r.fulfill({json:{place}}));await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[{id:'story-reader',title:'Local test story',source:'Test publisher',at:new Date().toISOString(),url:'https://example.test/story'}]},stale:false}}));await page.route('**/api/world/article/story-reader',r=>r.fulfill({json:{data:{id:'story-reader',title:'Local test story',source:'Test publisher',publishedAt:new Date().toISOString(),url:'https://example.test/story',restricted:false,blocks:[{kind:'paragraph',text:'This public article is rendered in the in-app reader.'}]},stale:false}}));
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await openTab(page,'News');await expect(page.locator('.world-panel')).toBeVisible();await page.locator('.world-stories button').first().click();await expect(page.locator('.world-article-reader h1')).toHaveText('Local test story');await expect(page.locator('.article-body')).toContainText('rendered in the in-app reader');await page.screenshot({path:`test-results/${testInfo.project.name}-overview.png`,fullPage:true});expect(errors).toEqual([]);
 });
-test('world radio plays in the app and keeps playing across panels',async({page})=>{await page.evaluate(()=>{Object.defineProperty(HTMLMediaElement.prototype,'src',{configurable:true,get(){return this.getAttribute('data-source')??''},set(value){this.setAttribute('data-source',value)}});HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('playing'));return Promise.resolve();};HTMLMediaElement.prototype.pause=function(){this.dispatchEvent(new Event('pause'));};});await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'radio-fixture',name:'Fixture World Radio',country:'GB',region:'London',stream:'https://example.test/live.mp3'}]},stale:false}}));await page.goto('/');await openTab(page,'Radio');await expect(page.locator('.world-panel')).toBeVisible();await page.locator('.world-station').click();await expect(page.locator('.radio-player')).toContainText('Fixture World Radio');await expect(page.locator('audio')).toHaveAttribute('src',/^https:/);await openTab(page,'News');await expect(page.locator('audio')).toHaveCount(1);await page.getByRole('button',{name:/Close radio player|Închide playerul radio/}).click();await expect(page.locator('audio')).toHaveCount(0);});
+test('world radio plays in the app and keeps playing across panels',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('meridian:lastPlace','"radio-city"'));
+ await page.route('**/api/places',r=>r.fulfill({json:{places:[{id:'radio-city',name:'London',country:'GB',region:'Greater London',lat:51.5,lon:-.12,aliases:[]}]}}));
+ await page.evaluate(()=>{Object.defineProperty(HTMLMediaElement.prototype,'src',{configurable:true,get(){return this.getAttribute('data-source')??''},set(value){this.setAttribute('data-source',value)}});HTMLMediaElement.prototype.load=function(){};HTMLMediaElement.prototype.play=function(){this.dispatchEvent(new Event('playing'));return Promise.resolve();};HTMLMediaElement.prototype.pause=function(){this.dispatchEvent(new Event('pause'));};});await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'radio-fixture',name:'Fixture World Radio',country:'GB',region:'London',stream:'https://example.test/live.mp3'}]},stale:false}}));await page.goto('/');await openTab(page,'Radio');await expect(page.locator('.world-panel')).toBeVisible();await page.locator('.world-station').click();await expect(page.locator('.radio-player')).toContainText('Fixture World Radio');await expect(page.locator('audio')).toHaveAttribute('src',/^https:/);await openTab(page,'News');await expect(page.locator('audio')).toHaveCount(1);await page.getByRole('button',{name:/Close radio player|Închide playerul radio/}).click();await expect(page.locator('audio')).toHaveCount(0);});
 test('weather forecast loads for the selected GPS location',async({page,context},testInfo)=>{const place={id:'gps',name:'București',country:'RO',region:'București',lat:44.4268,lon:26.1025,aliases:[]};await context.grantPermissions(['geolocation']);await context.setGeolocation({latitude:place.lat,longitude:place.lon});await page.route('**/api/location?*',r=>r.fulfill({json:{place}}));await page.route('**/api/weather?*',r=>r.fulfill({json:{data:{provider:'Open-Meteo',current:{temperature_2m:12,wind_speed_10m:5,relative_humidity_2m:70,time:'2026-11-06T12:00'},hourly:{time:[],temperature_2m:[],precipitation:[]}},stale:false}}));const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await openTab(page,'Weather');await expect(page.locator('.weather-now')).toBeVisible();await expect(page.locator('.weather-now')).toContainText('București');await page.screenshot({path:`test-results/${testInfo.project.name}-weather.png`,fullPage:true});expect(errors).toEqual([]);});
 test('responsive layout has no horizontal overflow',async({page},testInfo)=>{await page.goto('/');await page.waitForTimeout(1000);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);if(testInfo.project.name==='mobile')await expect(page.locator('.map-area')).toBeVisible();await page.screenshot({path:`test-results/${testInfo.project.name}-map.png`,fullPage:true});});
 test('public camera browsing remains disabled',async({page})=>{await page.goto('/');const navigation=page.getByRole('navigation',{name:'Main navigation'});if(!await navigation.isVisible())await page.getByRole('button',{name:'Side panel',exact:true}).click();await expect(navigation.getByRole('button',{name:'Cameras',exact:true})).toHaveCount(0);await expect(page.locator('.camera-card,.camera-modal')).toHaveCount(0);});
@@ -19,12 +47,22 @@ test('Romanian interface choice persists',async({page},info)=>{await page.goto('
 test('world news remains usable when map tiles fail',async({page,context})=>{const place={id:'gps',name:'București',country:'RO',region:'București',lat:44.4268,lon:26.1025,aliases:[]};await context.grantPermissions(['geolocation']);await context.setGeolocation({latitude:place.lat,longitude:place.lon});await page.route('https://tiles.openfreemap.org/**',r=>r.abort());await page.route('**/api/location?*',r=>r.fulfill({json:{place}}));await page.route('**/api/world/news?*',r=>r.fulfill({json:{data:{stories:[{id:'offline-map-story',title:'News while map tiles are offline',source:'Test publisher',at:new Date().toISOString(),url:'https://example.test/story'}]},stale:false}}));await page.route('**/api/world/article/offline-map-story',r=>r.fulfill({json:{data:{id:'offline-map-story',title:'News while map tiles are offline',source:'Test publisher',publishedAt:new Date().toISOString(),url:'https://example.test/story',restricted:false,blocks:[{kind:'paragraph',text:'The news reader remains available without map tiles.'}]},stale:false}}));await page.goto('/');await openTab(page,'News');await expect(page.locator('.world-panel')).toBeVisible();await page.locator('.world-stories button').first().click();await expect(page.locator('.article-body')).toContainText('remains available without map tiles');});
 
 test('world radio supports volume and keeps playback in app',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('meridian:lastPlace','"radio-city"'));
+ await page.route('**/api/places',r=>r.fulfill({json:{places:[{id:'radio-city',name:'London',country:'GB',region:'Greater London',lat:51.5,lon:-.12,aliases:[]}]}}));
+
  const wav=Buffer.alloc(8044,128);wav.write('RIFF',0);wav.writeUInt32LE(8036,4);wav.write('WAVEfmt ',8);wav.writeUInt32LE(16,16);wav.writeUInt16LE(1,20);wav.writeUInt16LE(1,22);wav.writeUInt32LE(8000,24);wav.writeUInt32LE(8000,28);wav.writeUInt16LE(1,32);wav.writeUInt16LE(8,34);wav.write('data',36);wav.writeUInt32LE(8000,40);
  await page.route('**/api/world/radio?*',r=>r.fulfill({json:{data:{stations:[{id:'test-radio',name:'Approved test station',country:'RO',region:'National',city:'Bucharest',genre:'news',stream:'https://media.example.org/test.wav'}]},stale:false}}));await page.route('https://media.example.org/test.wav',r=>r.fulfill({contentType:'audio/wav',body:wav}));
  await page.goto('/');await openTab(page,'Radio');expect(await page.locator('audio').count()).toBe(0);await page.locator('.world-station').click();await expect.poll(()=>page.locator('audio').evaluate((e:HTMLAudioElement)=>e.volume)).toBeCloseTo(.7);await expect(page.locator('.radio-player a[target="_blank"]')).toHaveCount(0);await page.getByRole('slider',{name:'Radio volume'}).fill('0.4');await expect.poll(()=>page.locator('audio').evaluate((e:HTMLAudioElement)=>e.volume)).toBeCloseTo(.4);await openTab(page,'News');await expect(page.locator('audio')).toHaveCount(1);await page.getByRole('button',{name:'Close radio player'}).click();await expect(page.locator('audio')).toHaveCount(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 
-test('traffic status remains visible in the current map layout',async({page})=>{await page.goto('/');await expect(page.locator('.automatic-traffic')).toContainText(/Traffic enabled|Trafic activ/);});
+test('traffic status remains visible and opens the traffic panel',async({page},info)=>{
+ await page.addInitScript(()=>localStorage.setItem('meridian:language','"en"'));
+ await page.route('**/api/observations?layer=road*',route=>route.fulfill({json:{data:[],stale:false,at:new Date().toISOString()}}));
+ await page.goto('/');
+ if(info.project.name==='mobile')await page.getByRole('button',{name:'Traffic in Romania',exact:true}).click();
+ else await page.getByRole('button',{name:/^0 road bulletins/}).click();
+ await expect(page.getByRole('complementary',{name:'Traffic',exact:true}).getByRole('status')).toContainText('0 road bulletins');
+});
 
 test('theme persists and mobile panel navigation is usable',async({page},info)=>{
  await page.goto('/');

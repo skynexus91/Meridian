@@ -5,7 +5,7 @@ vi.mock('node:dns/promises',()=>({resolveSrv:vi.fn(async()=>[{name:'de1.api.radi
 vi.mock('../server/feeds',()=>({fetchText:vi.fn()}));
 import {readArticles} from '../server/store';
 import {fetchText} from '../server/feeds';
-import {radioCountryCode} from '../server/radio';
+import {radioCountryCode,radioStations,stationsInArea} from '../server/radio';
 import {headlineIsLocal,worldNews,worldRadio} from '../server/world';
 beforeEach(()=>{vi.resetAllMocks();vi.mocked(readArticles).mockReturnValue([]);});afterEach(()=>vi.unstubAllGlobals());
 describe('worldwide information sources',()=>{
@@ -30,4 +30,20 @@ describe('local news boundaries',()=>{
  it('keeps locality matches and drops unrelated national headlines',()=>{expect(headlineIsLocal('Accident în Slatina','', 'Slatina')).toBe(true);expect(headlineIsLocal('Traffic in New York today','','New York')).toBe(true);expect(headlineIsLocal('World economy today','National summary','Slatina')).toBe(false);expect(headlineIsLocal('Slatinaville update','','Slatina')).toBe(false);});
  it('matches locality names independently of diacritics',()=>{expect(headlineIsLocal('Știri despre București','','Bucuresti')).toBe(true);});
  it('requires an area instead of returning an unfiltered world feed',async()=>{const result=await worldNews('',false,'en');expect(result.data?.stories).toEqual([]);expect(fetchText).not.toHaveBeenCalled();});
+});
+
+it('filters radio stations progressively without leaking outside the chosen geography',()=>{
+ const rows=[
+  ['local','RO','Cluj','Turda',46.57,23.78],
+  ['county','RO','Județul Cluj','Dej',47.14,23.88],
+  ['country','RO','Iași','Iași',47.16,27.59],
+  ['continent','FR','Paris','Paris',48.86,2.35],
+  ['overseas','US','New York','New York',40.71,-74],
+ ] as const;
+ const stations=radioStations(rows.map(([stationuuid,countrycode,state,city,geo_lat,geo_long])=>({stationuuid,name:stationuuid,countrycode,state,city,geo_lat,geo_long,url:'https://example.test/'+stationuuid})));
+ const results=(scope:'location'|'county'|'country'|'continent')=>stationsInArea(stations,'RO',{scope,city:'Turda',region:'Cluj County',lat:46.57,lon:23.78}).map(station=>station.id);
+ expect(results('location')).toEqual(['local']);
+ expect(results('county')).toEqual(['local','county']);
+ expect(results('country')).toEqual(['local','county','country']);
+ expect(results('continent')).toEqual(['local','county','country','continent']);
 });

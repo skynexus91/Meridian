@@ -29,14 +29,13 @@ Provider probes validate actual JSON/XML and satellite PNG bytes, not only HTTP 
 ```powershell
 npm test
 npm run build
-npm start
-# In another terminal while port 3001 runs:
 npm run test:e2e:prod
+# Start a preview on port 3001 before running live-provider checks:
 npm run test:live
 npm audit
 ```
 
-Development browser tests (`npm run test:e2e`) target Vite on port 5173. Packaged tests target 3001; TEST_BASE_URL overrides it. Evaluate live checks separately from deterministic tests because upstream services can fail independently of the app.
+Development browser tests (`npm run test:e2e`) target Vite on port 5173. Packaged browser tests start an isolated production server on port 4173. Use `TEST_BASE_URL` to target an existing production server. Evaluate live checks separately from deterministic tests because upstream services can fail independently of the app.
 
 ## UI and satellite update, 6 November 2026
 

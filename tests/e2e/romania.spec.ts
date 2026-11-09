@@ -33,6 +33,6 @@ test('road bulletin markers open their details inside the map',async({page},info
  await page.route('**/api/observations?layer=road**',route=>route.fulfill({json:{data:[road],stale:false}}));
  await page.route('**/api/road-detail?*',route=>route.fulfill({json:{data:{paragraphs:['Circulația este restricționată în zona București. Buletin de test.']},stale:false}}));
  await page.goto('/');await expect(page.locator('.road-marker').first()).toBeVisible({timeout:30000});await page.locator('.road-marker').first().click();
- await expect(page.locator('.observation-card')).toContainText('Buletin de test');expect(new URL(page.url()).pathname).toBe('/');
+ await expect(page.locator('.map-inspector')).toContainText('Buletin de test');expect(new URL(page.url()).pathname).toBe('/');
  await page.screenshot({path:`test-results/${info.project.name}-romania-traffic.png`});
 });
