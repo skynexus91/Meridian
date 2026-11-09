@@ -4,7 +4,7 @@ import {load} from 'cheerio';
 import {get,readArticles} from './store.js';
 import {sources} from './catalog.js';
 import {cached} from './providers.js';
-import {extractArticle} from './articles.js';
+import {detectArticleLanguage,extractArticle} from './articles.js';
 import type {ArticleContent} from '../src/types.js';
 interface Story {id:string;title:string;url:string;at:string;source:string;sourceUrl:string;summary:string}
 export function publicAddress(address:string){
@@ -35,7 +35,8 @@ async function publisherArticle(story:Story,publisher:string){
 export async function worldArticleReader(id:string){
  const story=get<Story>('world-story:'+id);if(!story)throw Object.assign(Error('Story unavailable. Refresh the news list.'),{statusCode:404});
  return cached('world-reader:v2:'+id,1800000,async()=>{
-  const fallback:ArticleContent&{summaryOnly:boolean}={id:story.id,title:story.title,url:story.url,source:story.source,publishedAt:story.at,restricted:false,summaryOnly:true,blocks:story.summary&&story.summary!==story.title?[{kind:'paragraph',text:story.summary}]:[]};
+  const knownLanguage=readArticles().find(article=>article.id===story.id)?.language;
+  const fallback:ArticleContent&{summaryOnly:boolean}={id:story.id,title:story.title,url:story.url,source:story.source,publishedAt:story.at,restricted:false,summaryOnly:true,language:detectArticleLanguage([story.title,story.summary].join(' '))??knownLanguage,blocks:story.summary&&story.summary!==story.title?[{kind:'paragraph',text:story.summary}]:[]};
   try{
    const publisher=host(story.sourceUrl);if(!publisher)return fallback;
    let target=story.url;
@@ -47,7 +48,7 @@ export async function worldArticleReader(id:string){
    }
    const page=await publicPage(target,new Set([publisher]));const content=extractArticle(page.html,page.url);
    if(!content.blocks.length)return fallback;
-   return {...fallback,...content,title:content.title||story.title,url:page.url,summaryOnly:false};
+   return {...fallback,...content,language:content.language??fallback.language,title:content.title||story.title,url:page.url,summaryOnly:false};
   }catch{return fallback;}
  });
 }

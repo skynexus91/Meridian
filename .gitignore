@@ -2,6 +2,7 @@ node_modules/
 dist/
 data/
 .env
+.vs/
 playwright-report/
 test-results/
 *.log

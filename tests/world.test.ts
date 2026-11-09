@@ -5,6 +5,7 @@ vi.mock('node:dns/promises',()=>({resolveSrv:vi.fn(async()=>[{name:'de1.api.radi
 vi.mock('../server/feeds',()=>({fetchText:vi.fn()}));
 import {readArticles} from '../server/store';
 import {fetchText} from '../server/feeds';
+import {radioCountryCode} from '../server/radio';
 import {headlineIsLocal,worldNews,worldRadio} from '../server/world';
 beforeEach(()=>{vi.resetAllMocks();vi.mocked(readArticles).mockReturnValue([]);});afterEach(()=>vi.unstubAllGlobals());
 describe('worldwide information sources',()=>{
@@ -15,6 +16,13 @@ describe('worldwide information sources',()=>{
  it('falls back to another radio directory server and filters insecure audio',async()=>{
   const fetch=vi.fn().mockRejectedValueOnce(Error('First host offline')).mockResolvedValueOnce(Response.json([{stationuuid:'uk-1',name:'London Radio',countrycode:'GB',url_resolved:'https://example.com/live',homepage:'https://example.com'},{stationuuid:'bad',url_resolved:'http://example.com/insecure'}]));vi.stubGlobal('fetch',fetch);
   const result=await worldRadio('GB','London');expect(result.data!.stations).toHaveLength(1);expect(result.data!.stations[0].country).toBe('GB');expect(fetch).toHaveBeenCalledTimes(2);expect(String(fetch.mock.calls[1][0])).toContain('countrycode=GB');
+ });
+ it('returns worldwide popular stations by default and interprets country searches',async()=>{
+  const fetch=vi.fn().mockImplementation(()=>Promise.resolve(Response.json([{stationuuid:'world-1',name:'Popular World FM',countrycode:'JP',url_resolved:'https://example.jp/live'}])));vi.stubGlobal('fetch',fetch);
+  const worldwide=await worldRadio('','');expect(worldwide.data?.stations[0].name).toBe('Popular World FM');
+  const globalUrl=new URL(String(fetch.mock.calls[0][0]));expect(globalUrl.searchParams.has('countrycode')).toBe(false);expect(globalUrl.searchParams.get('order')).toBe('clickcount');
+  await worldRadio('','Japan');const countryUrl=new URL(String(fetch.mock.calls[1][0]));expect(countryUrl.searchParams.get('countrycode')).toBe('JP');expect(countryUrl.searchParams.has('name')).toBe(false);
+  expect(radioCountryCode('United States')).toBe('US');expect(radioCountryCode('UK')).toBe('GB');
  });
 });
 

@@ -24,4 +24,4 @@ export type RoutePoint=[number,number];
 export interface RouteStep {type?:string;modifier?:string;name?:string;exit?:number;instruction:string;location:RoutePoint;distance:number}
 export interface DrivingRoute {steps?:RouteStep[];distance:number;duration:number;geometry:{type:'LineString';coordinates:number[][]};provider:string;calculatedAt:string}
 export interface ArticleBlock {kind:'paragraph'|'heading'|'image';text:string;src?:string}
-export interface ArticleContent {summaryOnly?:boolean;id:string;title:string;image?:string;blocks:ArticleBlock[];restricted:boolean;url:string;source:string;publishedAt:string}
+export interface ArticleContent {summaryOnly?:boolean;id:string;title:string;image?:string;blocks:ArticleBlock[];restricted:boolean;url:string;source:string;publishedAt:string;language?:string}

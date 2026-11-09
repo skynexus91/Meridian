@@ -68,6 +68,6 @@ export async function transcribe(buffer:Buffer,originalName:string):Promise<{ok:
 
 let speechQueue=Promise.resolve();let queuedSpeech=0;
 export function synthesize(text:string,lang?:string,country?:string):Promise<Awaited<ReturnType<typeof synthesizeNow>>>{
- if(queuedSpeech>=4)return Promise.resolve({ok:false,mime:'audio/mpeg',voice:pickVoice(lang,country),error:'Speech is busy. Browser speech remains available.'});
+ if(queuedSpeech>=4)return Promise.resolve({ok:false,mime:'audio/mpeg',voice:pickVoice(lang,country),error:'App voice service is busy. Try again shortly.'});
  queuedSpeech++;const result=speechQueue.then(async()=>{let timer:ReturnType<typeof setTimeout>;try{return await Promise.race([synthesizeNow(text,lang,country),new Promise<Awaited<ReturnType<typeof synthesizeNow>>>(resolve=>{timer=setTimeout(()=>{cachedTTS?.close();cachedTTS=null;resolve({ok:false,mime:'audio/mpeg',voice:pickVoice(lang,country),error:'Speech synthesis timed out'});},14000);})]);}finally{clearTimeout(timer!);queuedSpeech--;}});speechQueue=result.then(()=>{},()=>{});return result;
 }

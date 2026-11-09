@@ -1,8 +1,9 @@
 import {test,expect,type Page} from '@playwright/test';
-async function openRouteDock(page:Page){await page.locator('.route-feedback .dock-handle,.route-feedback [role=alert]').first().waitFor();const handle=page.locator('.route-feedback .dock-handle');if(await handle.count()&&await handle.getAttribute('aria-expanded')==='false')await handle.click();}
+async function openRouteDock(page:Page){const handle=page.locator('.dock-handle').first();await handle.waitFor();if(await handle.getAttribute('aria-expanded')==='false')await handle.click();}
 
 const places=[{id:'bucharest',name:'București',country:'RO',region:'București',lat:44.4268,lon:26.1025,aliases:['Bucharest']},{id:'ploiesti',name:'Ploiești',country:'RO',region:'Prahova',lat:44.94,lon:26.01,aliases:[]}];
 test.beforeEach(async({page,context})=>{
+ await page.addInitScript(()=>localStorage.setItem('meridian:language','"ro"'));
  await context.grantPermissions(['geolocation','microphone']);await context.setGeolocation({latitude:44.4268,longitude:26.1025});
  await page.route('**/api/suggestions?*',r=>r.fulfill({json:{places:[]}}));
  await page.route('**/api/speed-roads?*',r=>r.fulfill({json:{data:{roads:[]},stale:false}}));
@@ -18,6 +19,7 @@ test.beforeEach(async({page,context})=>{
 });
 test('plans a route, starts GPS, stops and invalidates edited endpoints',async({page})=>{test.setTimeout(180000);
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.evaluate(()=>Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition:(success:(position:unknown)=>void)=>success({coords:{latitude:44.4268,longitude:26.1025,heading:0,accuracy:5,speed:0},timestamp:Date.now()}),watchPosition:()=>1,clearWatch:()=>{}}}));
  await page.route('**/api/route?*',r=>r.fulfill({json:{distance:62000,duration:3600,provider:'OSRM · OpenStreetMap',calculatedAt:new Date().toISOString(),geometry:{type:'LineString',coordinates:[[26.1025,44.4268],[26.11,44.43],[26.01,44.94]]},steps:[{type:'depart',instruction:'depart',name:'DN1',location:[26.1025,44.4268],distance:62000},{type:'arrive',instruction:'arrive',location:[26.01,44.94],distance:0}]}}));
  await page.getByRole('button',{name:'Folosește GPS',exact:true}).click();await expect(page.getByRole('textbox',{name:'Plecare',exact:true})).toHaveValue('Locația mea');
  await page.getByRole('textbox',{name:'Destinație',exact:true}).fill('Ploie');await page.locator('.route-suggestions button').first().click();await page.getByRole('button',{name:'Calculează traseul',exact:true}).click();await openRouteDock(page);
