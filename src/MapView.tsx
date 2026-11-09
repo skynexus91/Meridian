@@ -10,7 +10,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type {EarthLayer,OrbitalSatellite,NewsEvent,Place,Observation,WeatherFrame,Camera,Station,POI} from './types';
 import {LocateFixed,Plus,Minus,Map as MapIcon} from 'lucide-react';
 maplibregl.setWorkerUrl(workerUrl);
-interface Props {onMapCenter?:(lon:number,lat:number,zoom:number)=>void;pickingPin?:boolean;onMapPin?:(lon:number,lat:number)=>void;mapPin?:Place;gps?:{lon:number;lat:number;heading?:number;accuracy?:number;speed?:number|null};navigating?:boolean;streetMode:boolean;onReady:(ready:boolean)=>void;routing?:RoutingState;incidentFocus?:Observation;theme:string;earthLayer?:EarthLayer;earthOpacity:number;satellites:OrbitalSatellite[];selectedSatellite:string;onSatellite:(id:string)=>void;roadMode:boolean;forecastPlace?:Place;events:NewsEvent[];places:Place[];country:string;focus?:Place;selected?:string;onSelect:(id:string)=>void;observations:Observation[];onObservation:(o:Observation)=>void;frame?:WeatherFrame;opacity:number;satellite:boolean;cameras:Camera[];stations:Station[];onCamera:(c:Camera)=>void;onStation:(s:Station)=>void;flow?:string;onWeatherReady?:(url:string)=>void;pois:POI[];onPoi:(poi:POI)=>void;baseStyle:'street'|'satellite';googleLayer:'off'|'streets'|'satellite';onGps?:()=>void}
+interface Props {onMapCenter?:(lon:number,lat:number,zoom:number)=>void;pickingPin?:boolean;onMapPin?:(lon:number,lat:number)=>void;mapPin?:Place;gps?:{lon:number;lat:number;heading?:number;accuracy?:number;speed?:number|null};navigating?:boolean;onReady:(ready:boolean)=>void;routing?:RoutingState;incidentFocus?:Observation;theme:string;earthLayer?:EarthLayer;earthOpacity:number;satellites:OrbitalSatellite[];selectedSatellite:string;onSatellite:(id:string)=>void;roadMode:boolean;forecastPlace?:Place;events:NewsEvent[];country:string;focus?:Place;selected?:string;onSelect:(id:string)=>void;observations:Observation[];onObservation:(o:Observation)=>void;frame?:WeatherFrame;opacity:number;satellite:boolean;cameras:Camera[];stations:Station[];onCamera:(c:Camera)=>void;onStation:(s:Station)=>void;flow?:string;onWeatherReady?:(url:string)=>void;pois:POI[];onPoi:(poi:POI)=>void;baseStyle:'street'|'satellite';googleLayer:'off'|'streets'|'satellite';onGps?:()=>void}
 export default function MapView(p:Props){const tr=useTranslation();const element=useRef<HTMLDivElement>(null);const map=useRef<MapType|undefined>(undefined);const latest=useRef(p);latest.current=p;const [ready,setReady]=useState(false);const [failed,setFailed]=useState(false);const [tileError,setTileError]=useState(false);const [followGps,setFollowGps]=useState(true);
  useEffect(()=>setFollowGps(true),[p.navigating]);
  const site=p.forecastPlace;
@@ -45,8 +45,6 @@ export default function MapView(p:Props){const tr=useTranslation();const element
  m.on('dragstart',()=>setFollowGps(false));m.on('moveend',()=>{const center=m.getCenter();latest.current.onMapCenter?.(center.lng,center.lat,m.getZoom());if(element.current)element.current.dataset.zoom=m.getZoom().toFixed(2);});m.once('style.load',()=>{
   m.addSource('earth',{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:18,attribution:'Imagery © Esri, Maxar, Earthstar Geographics, GIS User Community'});
   
-  m.addSource('cities',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  m.addLayer({id:'cities',type:'symbol',source:'cities',layout:{'text-field':['get','name'],'text-size':11,'text-font':['Noto Sans Regular'],'text-offset':[0,1.3]},paint:{'text-color':'#e7efdf','text-halo-color':'#20342f','text-halo-width':1.2}});
   m.addSource('events',{type:'geojson',data:{type:'FeatureCollection',features:[]},cluster:true,clusterRadius:38,clusterMaxZoom:9});
   m.addLayer({id:'clusters',type:'circle',source:'events',filter:['has','point_count'],paint:{'circle-color':'#88dfbe','circle-radius':['step',['get','point_count'],16,10,21,50,27],'circle-opacity':0.9,'circle-stroke-width':5,'circle-stroke-color':'rgba(136,223,190,.12)'}});
   m.addLayer({id:'cluster-count',type:'symbol',source:'events',filter:['has','point_count'],layout:{'text-field':['get','point_count_abbreviated'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':'#16392d'}});
@@ -69,9 +67,8 @@ export default function MapView(p:Props){const tr=useTranslation();const element
  },[]);
   useEffect(()=>{if(!ready)return;const m=map.current!;const fc=(items:any[])=>({type:'FeatureCollection' as const,features:items.map(o=>({type:'Feature' as const,geometry:{type:'Point' as const,coordinates:[o.lon,o.lat]},properties:o}))});
  (m.getSource('events') as GeoJSONSource).setData(fc(p.events.filter(e=>e.place).map(e=>({id:e.id,category:e.category,lon:e.place!.lon,lat:e.place!.lat}))));
- (m.getSource('cities') as GeoJSONSource).setData(fc(p.places));
  (m.getSource('traffic') as GeoJSONSource).setData(fc(p.observations.filter(o=>o.kind!=='road')));(m.getSource('cameras') as GeoJSONSource).setData(fc(p.cameras.filter(c=>Number.isFinite(c.lat)&&Number.isFinite(c.lon))));(m.getSource('stations') as GeoJSONSource).setData(fc(p.stations));(m.getSource('pois') as GeoJSONSource).setData(fc(p.pois.map(o=>({...o,icon:o.type==='restaurant'?'🍴':o.type==='parking'?'P':o.type==='fuel'?'⛽':o.type==='hotel'?'🏨':o.type==='motel'?'🏨':o.type==='pension'?'🏨':o.type==='tourist'?'📍':o.type==='traffic'?'⚠️':'📍'}))));
- },[ready,p.places,p.events,p.observations,p.cameras,p.stations,p.pois]);
+ },[ready,p.events,p.observations,p.cameras,p.stations,p.pois]);
  useEffect(()=>{if(!ready)return;const m=map.current!;m.setLayoutProperty('pois','visibility','none');const markers=p.pois.slice(0,60).map(poi=>{const button=document.createElement('button');button.className='poi-marker';button.setAttribute('aria-label',poi.name);button.title=poi.name;button.textContent=poi.type==='fuel'?'⛽':poi.type==='restaurant'?'🍴':poi.type==='parking'?'P':['hotel','motel','pension'].includes(poi.type)?'H':'📍';button.addEventListener('click',event=>{if(latest.current.pickingPin)return;event.stopPropagation();latest.current.onPoi(poi);});return new maplibregl.Marker({element:button}).setLngLat([poi.lon,poi.lat]).addTo(m);});return()=>markers.forEach(marker=>marker.remove());},[ready,p.pois]);
  useEffect(()=>{if(!ready)return;const m=map.current!;if(latest.current.navigating||p.gps&&(!p.focus||p.focus.id==='gps'))return;if(p.focus)m.flyTo({center:[p.focus.lon,p.focus.lat],zoom:13,duration:900});else m.fitBounds([[20.2,43.5],[29.8,48.4]],{padding:50,duration:900});},[ready,p.country,p.focus]);
  useEffect(()=>{if(!ready)return;const m=map.current!;if(m.getLayer('satellite'))m.removeLayer('satellite');if(m.getSource('satellite'))m.removeSource('satellite');m.setLayoutProperty('osm','visibility',p.baseStyle==='satellite'?'none':'visible');if(p.baseStyle==='satellite'){m.addSource('satellite',{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:19,attribution:'Imagery © Esri'});m.addLayer({id:'satellite',type:'raster',source:'satellite'},'clusters');}},[ready,p.baseStyle]);
@@ -131,11 +128,9 @@ export default function MapView(p:Props){const tr=useTranslation();const element
   
   
   
-  m.setPaintProperty('cities','text-color',p.streetMode&&p.theme!=='dark'?'#35434a':'#e7efdf');
-  m.setPaintProperty('cities','text-halo-color',p.streetMode&&p.theme!=='dark'?'#ffffff':'#20342f');
   for(const id of ['clusters','cluster-count','events-points','events-glow'])m.setLayoutProperty(id,'visibility','none');
   m.setPaintProperty('osm','raster-saturation',p.theme==='dark'?-.6:0);m.setPaintProperty('osm','raster-brightness-max',p.theme==='dark'?.45:1);
- },[ready,p.roadMode,p.streetMode,p.theme]);
+ },[ready,p.roadMode,p.theme]);
  useEffect(()=>{if(ready&&p.incidentFocus?.kind==='road')map.current?.flyTo({center:[p.incidentFocus.lon,p.incidentFocus.lat],zoom:8,duration:500});},[ready,p.incidentFocus?.id]);
  useEffect(()=>{
   if(!ready)return;const m=map.current!;

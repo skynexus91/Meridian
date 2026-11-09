@@ -65,3 +65,10 @@ All timestamps use Europe/Bucharest. Keep entries factual and include commands/c
 - Previously completed `app.spec.ts` desktop and mobile runs passed **14/14 each**. Focused read-aloud/radio/weather checks passed on desktop and mobile. The full two-project suite and the long navigation group have not completed reliably; do not claim all browser features are green.
 - Known limits: browser tests mostly stub outside providers; live Radio Browser access previously returned `ECONNRESET`. Real radio, news, routing, map tile, voice service, proxy-chain, credential/quota, accessibility, security-header, deployment, and rollback checks remain production gates.
 - Added `PRODUCTION_READINESS_REPORT.md` with a plain-language status, limitations, continuation hints, and a planning estimate of 4–7 focused engineering days after provider/deployment access is ready. The estimate is conditional and should be revised after live checks.
+
+## 2026-11-09 — Duplicate city labels
+
+- Diagnosis: the OpenStreetMap raster basemap already contains rendered city names, while `MapView` also added a GeoJSON `cities` symbol layer using the same place list. Both layers painted the same city label.
+- Removed the redundant GeoJSON city-label source/layer and its theme paint updates. Kept the OSM basemap labels, which also avoids another set of independent labels competing for map space.
+- Rendered the deployed app while reviewing the report; the basemap loaded. The duplicate-label fix is local and has not been deployed.
+- Verification: `npm run build` passed (TypeScript check and Vite production bundle); `git diff --check` passed. Reloaded the local app for visual review after hot reload. A raster-label visual case is difficult to assert as a stable unit test because OSM owns those labels.
