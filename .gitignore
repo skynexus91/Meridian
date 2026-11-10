@@ -5,4 +5,5 @@ data/
 .vs/
 playwright-report/
 test-results/
+qa-shots/
 *.log

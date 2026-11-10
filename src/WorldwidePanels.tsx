@@ -1,7 +1,7 @@
 import {usePlaceSuggestions} from './locationHooks';
 import WorldArticleReader from './WorldArticleReader';
 import {useEffect,useRef,useState,type CSSProperties} from 'react';
-import {CloudSun,ExternalLink,Globe2,LoaderCircle,MapPin,Newspaper,Play,Radio,Search,TrafficCone,X} from 'lucide-react';
+import {Globe2,LoaderCircle,MapPin,Newspaper,Play,Radio,Search,TrafficCone,X} from 'lucide-react';
 import {api,ago,useApi} from './lib';
 import WeatherPanel from './WeatherPanel';
 import type {Observation,Place,Station} from './types';

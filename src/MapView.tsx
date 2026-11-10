@@ -50,7 +50,7 @@ export default function MapView(p:Props){const tr=useTranslation();const element
   m.addLayer({id:'cluster-count',type:'symbol',source:'events',filter:['has','point_count'],layout:{'text-field':['get','point_count_abbreviated'],'text-font':['Noto Sans Regular'],'text-size':11},paint:{'text-color':'#16392d'}});
   m.addLayer({id:'events-glow',type:'circle',source:'events',filter:['!',['has','point_count']],paint:{'circle-color':['match',['get','category'],'war','#e79b74','weather','#9bbff0','#86ddbc'],'circle-radius':12,'circle-opacity':0.12}});
   m.addLayer({id:'events-points',type:'circle',source:'events',filter:['!',['has','point_count']],paint:{'circle-color':['match',['get','category'],'war','#e79b74','weather','#9bbff0','#86ddbc'],'circle-radius':5,'circle-stroke-width':1.5,'circle-stroke-color':'#d7f7eb'}});
-  m.addSource('traffic',{type:'geojson',data:{type:'FeatureCollection',features:[]}});m.addLayer({id:'traffic',type:'circle',source:'traffic',paint:{'circle-radius':4,'circle-color':['match',['get','kind'],'air','#b0c4ff','sea','#65c9de','#efc46f'],'circle-stroke-color':'#12252c','circle-stroke-width':1}});
+  m.addSource('traffic',{type:'geojson',data:{type:'FeatureCollection',features:[]}});m.addLayer({id:'traffic',type:'circle',source:'traffic',paint:{'circle-radius':4,'circle-color':'#efc46f','circle-stroke-color':'#12252c','circle-stroke-width':1}});
   m.addSource('cameras',{type:'geojson',data:{type:'FeatureCollection',features:[]}});m.addLayer({id:'cameras',type:'circle',source:'cameras',paint:{'circle-radius':7,'circle-color':'#d8b6e8','circle-stroke-width':2,'circle-stroke-color':'#152d33'}});
   m.addSource('stations',{type:'geojson',data:{type:'FeatureCollection',features:[]}});m.addLayer({id:'stations',type:'circle',source:'stations',paint:{'circle-radius':7,'circle-color':'#f0c77b','circle-stroke-width':2,'circle-stroke-color':'#152d33'}});
   m.addSource('pois',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
@@ -123,6 +123,14 @@ export default function MapView(p:Props){const tr=useTranslation();const element
   });
   return ()=>{markers.forEach(marker=>marker.remove());};
  },[ready,p.observations]);
+ useEffect(()=>{
+  if(!ready)return;const m=map.current!;
+  if(!p.flow){if(m.getSource('traffic-flow')){m.removeLayer('traffic-flow');m.removeSource('traffic-flow');}return;}
+  const url=p.flow.replace('{z}','{z}').replace('{x}','{x}').replace('{y}','{y}');
+  if(!m.getSource('traffic-flow')){m.addSource('traffic-flow',{type:'raster',tiles:[url],tileSize:256,maxzoom:22,attribution:'Traffic flow by TomTom'});m.addLayer({id:'traffic-flow',type:'raster',source:'traffic-flow',paint:{'raster-opacity':0.7}},'clusters');}
+  else{(m.getSource('traffic-flow') as unknown as {setTiles:(tiles:string[])=>void}).setTiles([url]);}
+ },[ready,p.flow]);
+
  useEffect(()=>{
   if(!ready)return;const m=map.current!;
   

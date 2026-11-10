@@ -1,8 +1,8 @@
 import {useEffect,useRef,useState,type CSSProperties,type PointerEvent as ReactPointerEvent,type KeyboardEvent} from 'react';
 export function clampToolbar(point:{left:number;top:number},size:{width:number;height:number},viewport:{width:number;height:number}){return {left:Math.max(8,Math.min(point.left,Math.max(8,viewport.width-size.width-8))),top:Math.max(8,Math.min(point.top,Math.max(8,viewport.height-size.height-8)))};}
 const key='meridian:toolbar-position:v1';
-export function placeFloatingPanel(anchor:{left:number;top:number;height:number},size:{height:number;width:number},viewport:{width:number;height:number}){
- const margin=12,gap=12;const width=Math.min(size.width,Math.max(0,viewport.width-margin*2));const belowStart=anchor.top+anchor.height+gap;const below=Math.max(0,viewport.height-margin-belowStart);const above=Math.max(0,anchor.top-gap-margin);const useBelow=below>=Math.min(size.height,300)||below>=above;
+export function placeFloatingPanel(anchor:{left:number;top:number;height:number},size:{height:number;width:number},viewport:{width:number;height:number},offset=0){
+ const margin=12,gap=12;const width=Math.min(size.width,Math.max(0,viewport.width-margin*2));const belowStart=anchor.top+anchor.height+gap+offset;const below=Math.max(0,viewport.height-margin-belowStart);const above=Math.max(0,anchor.top-gap-margin);const useBelow=below>=Math.min(size.height,300)||below>=above;
  const height=Math.min(size.height,useBelow?below:above,viewport.height-margin*2);
  return {position:'fixed' as const,left:Math.max(margin,Math.min(anchor.left,viewport.width-width-margin)),top:useBelow?belowStart:Math.max(margin,anchor.top-gap-height),width,maxHeight:Math.max(0,height)};
 }
@@ -18,7 +18,7 @@ export function useFloatingToolbar(){
  function reset(){setSaved(null);try{localStorage.removeItem(key);}catch{}}
  function onKeyDown(e:KeyboardEvent<HTMLButtonElement>){const delta=e.shiftKey?40:10;const directions:Record<string,[number,number]>={ArrowLeft:[-delta,0],ArrowRight:[delta,0],ArrowUp:[0,-delta],ArrowDown:[0,delta]};if(!directions[e.key])return;e.preventDefault();const [x,y]=directions[e.key];const next=clampToolbar({left:bounds.left+x,top:bounds.top+y},bounds,{width:innerWidth,height:innerHeight});setBounds(previous=>({...previous,...next}));persist(next.left,next.top);}
  const viewportHeight=typeof innerHeight==='number'?innerHeight:800,viewportWidth=typeof innerWidth==='number'?innerWidth:1200;
- function panelStyle(height:number,width:number):CSSProperties{return placeFloatingPanel(bounds,{height,width},{width:viewportWidth,height:viewportHeight});}
+ function panelStyle(height:number,width:number,offset=0):CSSProperties{return placeFloatingPanel(bounds,{height,width},{width:viewportWidth,height:viewportHeight},offset);}
 
  return {ref,style:{left:bounds.left,top:bounds.top,right:'auto'} as CSSProperties,nearBottom:bounds.top>viewportHeight/2,onPointerDown,onPointerMove,onPointerUp,onKeyDown,reset,panelStyle};
 }

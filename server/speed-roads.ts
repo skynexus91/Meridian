@@ -1,10 +1,11 @@
 import {cached} from './providers.js';
 import {fetchText} from './feeds.js';
 import type {SpeedRoad} from '../src/speed.js';
-export async function speedRoads(lat:number,lon:number){
+const HIGHWAY='^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link)$';
+export async function speedRoads(lat:number,lon:number,radius=1100){
  const centerLat=Math.round(lat*200)/200,centerLon=Math.round(lon*200)/200;
- return cached(`speed-roads:v1:${centerLat}:${centerLon}`,43200000,async()=>{
-  const query=`[out:json][timeout:12];way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link)$"](around:1100,${centerLat},${centerLon});out tags geom;`;
+ return cached(`speed-roads:v2:${radius}:${centerLat}:${centerLon}`,43200000,async()=>{
+  const query=`[out:json][timeout:12];way["highway"~"${HIGHWAY}"](around:${radius},${centerLat},${centerLon});out tags geom;`;
   let payload:any;let lastError:unknown;
   const endpoints=process.env.OVERPASS_URL?[process.env.OVERPASS_URL]:['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
   for(const base of endpoints){try{const url=new URL(base);url.searchParams.set('data',query);const candidate=JSON.parse((await fetchText(url.href,{'User-Agent':'Meridian/1.0 (+https://meridian-gps-navi-openmaps-libremaps.onrender.com/)','Accept':'application/json'})).body);if(candidate.remark||!Array.isArray(candidate.elements))throw Error('Incomplete road data');payload=candidate;break;}catch(error){lastError=error;}}

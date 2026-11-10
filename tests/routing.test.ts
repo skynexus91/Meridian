@@ -23,4 +23,8 @@ describe('worldwide driving routes',()=>{
   vi.resetModules();const request=vi.fn().mockResolvedValue(new Response(JSON.stringify({code:'Ok',routes:[{distance:6000,duration:900,geometry:{type:'LineString',coordinates:[[-.1278,51.5074],[-.1,51.53]]}}]}),{status:200}));vi.stubGlobal('fetch',request);
   const {drivingRoute}=await import('../server/routing');const route=await drivingRoute({startLon:-.1278,startLat:51.5074,endLon:-.1,endLat:51.53});expect(route.distance).toBe(6000);expect(route.geometry.coordinates[0]).toEqual([-.1278,51.5074]);
  });
+ it('rejects a route whose snapped endpoints are far from the requested coordinates',async()=>{
+  vi.resetModules();const request=vi.fn().mockResolvedValue(new Response(JSON.stringify({code:'Ok',routes:[{distance:3900000,duration:900,geometry:{type:'LineString',coordinates:[[-8.99,37.02],[-8.99,37.02]]}}]}),{status:200}));vi.stubGlobal('fetch',request);
+  const {drivingRoute}=await import('../server/routing');await expect(drivingRoute({startLon:-.1278,startLat:51.5074,endLon:-.1,endLat:51.53})).rejects.toMatchObject({statusCode:422});
+ });
 });

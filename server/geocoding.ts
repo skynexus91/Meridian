@@ -2,10 +2,10 @@ import type {Place} from '../src/types.js';
 const cache=new Map<string,{at:number;places:Place[]}>();let lastRequest=0;
 export async function searchAddresses(query:string):Promise<Place[]>{
  const key=query.trim().toLocaleLowerCase('ro');const saved=cache.get(key);if(saved&&Date.now()-saved.at<86400000)return saved.places;
- if(Date.now()-lastRequest<1100)throw Object.assign(new Error('Așteaptă o secundă înainte de o nouă căutare.'),{statusCode:429});lastRequest=Date.now();
+ if(Date.now()-lastRequest<1100)throw Object.assign(new Error('Address search busy. Try again shortly.'),{statusCode:429});lastRequest=Date.now();
  const url=new URL('/search',process.env.NOMINATIM_URL??'https://nominatim.openstreetmap.org');url.search=new URLSearchParams({q:query.trim(),format:'jsonv2',limit:'5',addressdetails:'1','accept-language':'ro,en'}).toString();
  const response=await fetch(url,{headers:{'User-Agent':'MeridianRomania/0.1 (local interactive address search)'},signal:AbortSignal.timeout(12000)});
- if(!response.ok)throw Object.assign(new Error('Căutarea adreselor nu este disponibilă momentan.'),{statusCode:502});
+ if(!response.ok)throw Object.assign(new Error('Address search unavailable at the moment.'),{statusCode:502});
  const data=await response.json();if(!Array.isArray(data))throw new Error('Invalid address search response');
  const places:Place[]=data.filter(row=>Number.isFinite(Number(row.lat))&&Number.isFinite(Number(row.lon))&&Math.abs(Number(row.lat))<=90&&Math.abs(Number(row.lon))<=180).map(row=>({id:'osm:'+row.osm_type+':'+row.osm_id,name:String(row.display_name),country:String(row.address?.country_code??'').toUpperCase(),region:String(row.address?.city??row.address?.town??row.address?.state??row.address?.county??''),lat:Number(row.lat),lon:Number(row.lon),aliases:[]}));
  if(cache.size>=200)cache.delete(cache.keys().next().value!);cache.set(key,{at:Date.now(),places});return places;

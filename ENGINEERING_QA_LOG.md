@@ -72,3 +72,72 @@ All timestamps use Europe/Bucharest. Keep entries factual and include commands/c
 - Removed the redundant GeoJSON city-label source/layer and its theme paint updates. Kept the OSM basemap labels, which also avoids another set of independent labels competing for map space.
 - Rendered the deployed app while reviewing the report; the basemap loaded. The duplicate-label fix is local and has not been deployed.
 - Verification: `npm run build` passed (TypeScript check and Vite production bundle); `git diff --check` passed. Reloaded the local app for visual review after hot reload. A raster-label visual case is difficult to assert as a stable unit test because OSM owns those labels.
+
+
+## 2026-11-09 — Local product and documentation audit
+
+### Scope and baseline
+
+- Reviewed the original Windows checkout under `Documents/gods eye view romania` on `main` at `a83f82e`, including current uncommitted radio and speech work. Used port 3001 for the production bundle and live API sample, and the configured dev target for the automated browser subset. Preserved the existing changes and QA artifacts.
+- Examined the 15 first-party Markdown files. Product and setup: `README.md`, `PRD.md`, `SOURCE_INVENTORY.md`. Engineering and release process: `ENGINEERING_QA_PLAN.md`, `ENGINEERING_QA_LOG.md`, `PRODUCTION_TESTING.md`, `TESTING.md`. Status and earlier QA: `APP_REVIEW.md`, `IMPLEMENTATION_STATUS.md`, `PRODUCTION_REPORT.md`, `PRODUCTION_READINESS_REPORT.md`, `QA_REVIEW.md`, `QA_STATUS_BRIEF.md`. Handoff material: `OPENCODE_HANDOFF.md`, `OPENCODE_PROMPT.md`. Treated previous counts, schedules, product decisions and provider results as dated evidence. Checked Markdown links to relative files and found no missing targets.
+- Current code and tests take precedence where records conflict. The older Romania-only PRD and implementation status describe the observatory era. Worldwide planning and information panels are current. Guidance starts on explicit **Start GPS**. Read-aloud uses server-generated audio with article language, then GPS-country fallback. The panel defaults to the GPS country's radio stations. Public cameras are absent from current navigation, while the catalog endpoint remains callable.
+- The README still describes a configurable Google basemap through `VITE_GOOGLE_MAPS_BROWSER_KEY`. No frontend consumer of that variable was found. `MapView.tsx` shows the fallback notice for either Google selection and mounts OpenStreetMap. Treat Google basemap support as an unresolved documentation/implementation mismatch.
+
+### Fresh verification
+
+- `npm test` passed 92 tests in 22 files. `npm run build` passed TypeScript and Vite. The MapLibre chunk was 1.07 MB raw and 293 KB gzip. `npm audit --omit=dev` reported zero known production dependency vulnerabilities at the time of the check. `git diff --check` passed with existing line-ending warnings.
+- The local page and hashed JS returned HTTP 200 with the expected MIME types. The JS reported `public, max-age=3600`. CSP, HSTS and Permissions-Policy headers were present. `/robots.txt` returned plain text. Invalid event filters and POI coordinates returned concise HTTP 400 messages. Unauthenticated admin state returned HTTP 401.
+- Live local sample returned 98 stations tagged RO, 20 Câmpia Turzii news stories, 12 nearby POIs, a fresh forecast, a 10.7 km local route, two recent road bulletins and 63 civil-air observations. A Romanian GPS-only speech request returned a non-empty WAV. AIS returned its configuration-required status. Server transcription reported disabled. The legacy camera catalog returned 813 entries without authentication. These are point-in-time checks through the running API, which can serve cached provider data.
+- Prior local speech verification exercised the installed Piper models for Arabic, English, French, Hindi, Mandarin, Romanian and Spanish. Startup on an unloaded voice took approximately 5–12 seconds. The Romanian screenshot article started playback in Chromium, and pause, resume and stop worked. Additional European model installation is deferred by user direction.
+- Prior targeted radio verification passed on desktop and mobile. Current behavior sends the device GPS country for the default list, removes that filter for an explicit station/country search, restores it after clearing the search and falls back worldwide when location is unavailable.
+
+### Findings to carry forward
+
+| Severity | Finding and evidence | Code area |
+| --- | --- | --- |
+| P0 | The Render default `TRUST_PROXY` value is the string `1`. In an isolated Fastify fixture with the installed dependencies, two forwarded clients behind one peer resolved to the same peer IP and the second got HTTP 429 at a one-request limit. Using the explicit trusted fixture peer separated their buckets. Numeric `1` also failed closed in this installed version. Production needs its actual trusted peer configuration and an end-to-end check. | `server/app.ts`, Fastify request handling |
+| P0 | A route from `44.4268,26.1025` to `0,-140` returned HTTP 200, 3,909.8 km and 47,795 geometry points from OSRM. The last point was `[-8.996473,37.023233]`, far from the requested destination. The route accepts provider-snapped endpoints without bounding their distance from the requested coordinates. Reject an out-of-range snap and distinguish no route from provider outages. | `server/routing.ts`, `server/app.ts` |
+| P1 | The news area search uses the shared Photon place/address matcher. A Câmpia Turzii query returned a courtyard, mess hall, air base and street entries alongside the town. The dropdown gives no indication that the entries pick a news area. Prefer locality matches in this context and label the purpose of the suggestions. Keep address and landmark results available to navigation. | `src/WorldwidePanels.tsx`, `src/locationHooks.ts`, `server/suggestions.ts` |
+| P1 | `/api/events?limit=500` returned 535,905 decoded bytes in the sample. The current frontend normally requests 100. Keep the large endpoint on the response-size backlog and measure under controlled conditions before assigning latency to event generation. | `server/app.ts`, `src/App.tsx` |
+| P1 | Google basemap instructions imply the key activates Google layers, but the current UI always displays the fallback for either Google selection. OpenStreetMap fallback and actual Google integration are separate acceptance checks. | `README.md`, `src/MapView.tsx` |
+| P1 | The public camera UI is intentionally disabled. The unauthenticated catalog remains reachable directly and needs an explicit decision on public API exposure. | `server/app.ts`, `src/App.tsx` |
+| P1 | TTS sends the text in a GET query, making the spoken text eligible for request and proxy logs in deployment. Voice synthesis also serializes requests through one short queue. Verify log redaction and measure contention before a public release. | `src/ReadAloud.tsx`, `server/voice.ts`, `server/app.ts` |
+| P2 | Several Markdown files use older test counts or earlier behavior such as automatic GPS start, browser speech fallback or public camera controls. Use the date and baseline when quoting results. | Documentation inventory above |
+
+### Browser and live release evidence
+
+- `TEST_BASE_URL=http://127.0.0.1:3001 npm run test:release:live` passed all 18 checks. Samples covered five weather locations, three station searches, four POI areas, Turda–Oslo routing, three news queries, health and neural speech. The live gate accepts any non-empty audio MIME response and checks route geometry length. It does not validate snapped endpoint distance, radio playback or physical driving.
+- Production-bundle Chromium smoke used 1440 px English with the saved Google Streets preference and 390 px Romanian with Google Satellite. Both mounted the map canvas, had a visible initial keyboard focus indicator, reported the expected document language and title, and had no page exceptions or page-level horizontal overflow. The first browser attempt timed out during concurrent build/probes. A fresh run after the build passed. The settled phone capture loaded 20 OpenStreetMap PNG tiles with HTTP 200. The Romanian shortcut strip was horizontally scrollable, with 406 px of content in 366 px and the final button partly visible. The mobile basemap notice was partly covered by the toolbar on first paint. This was a limited keyboard/name/layout check, with no WCAG conformance claim.
+- The selected Playwright run covered 14 desktop/mobile cases out of 98 listed. Twelve passed, including GPS forecast, responsive overflow, country-first radio and search, phone-width header controls, exact-country route planning with explicit GPS start, and article speech past 2,000 characters. Both rerouting cases timed out at the post-selection `Calculează traseul` click in `tests/e2e/navigation.spec.ts:94`. The desktop trace resolved a hidden button. Mobile waited for the same accessible name. Neither reached the GPS deviation assertions, so rerouting remains unverified by this run. The traces and failure screenshots are in the corresponding desktop and mobile directories under `test-results/`. The other 84 listed cases were outside this run.
+- Screenshots are in ignored `test-results/manual-audit/`. The two initial captures show the canvas before raster tiles painted. Use `mobile-settled.png` to review the rendered map.
+- Open production gates include verifying the actual reverse-proxy configuration, route rejection for disconnected or implausibly snapped endpoints, full browser regression, real-device permissions and a physical drive, live station playback, accessibility, and provider/deployment terms and operations.
+- Product code and pre-existing local changes were preserved during this audit. Only this log and the corresponding QA backlog entries were updated.
+
+## 2026-11-09 — Azure Maps basemap, TomTom traffic, scope reduction
+
+### Changed
+
+- Replaced the Google Maps preference with Azure Maps raster tiles rendered by MapLibre: `microsoft.base.road` for streets and `microsoft.imagery` for satellite, both requested at `tileSize=256` through `atlas.microsoft.com`. Without `VITE_AZURE_MAPS_KEY` the map falls back to OpenStreetMap streets and Esri World Imagery.
+- Removed the Google basemap selector from the admin panel, the saved `googleLayer` preference, the Google fallback notice, and the raw tile-error notice. Map tile failures no longer surface provider text to users.
+- Removed civil air traffic, maritime/AIS traffic and public webcam features from the API, UI, catalog and provider health. Deleted `server/camera-catalog.ts`, `server/camera-pages.json`, `server/aircraft.ts`, `server/ais.ts`, `src/RoadView.tsx`, `src/MapBriefing.tsx` and `src/SatellitePanel.tsx`, plus their unit tests and the now-unused `ws` dependency. `/api/observations` now accepts only `layer=road`; `/api/cameras`, `/api/camera-player` and the AIS admin flag are gone.
+- Road traffic keeps two independent sources: official INFOTRAFIC/Poliția Română bulletins (always on) and TomTom traffic-flow tiles through `/api/traffic/flow/{z}/{x}/{y}` (only when `TOMTOM_API_KEY` is set). Requests above zoom 18 are redirected to zoom 18.
+- Selecting a destination suggestion no longer starts route calculation. The user must press **Calculează traseul**, matching the documented manual flow.
+- GPS and network failures now show localized, actionable text instead of raw provider errors such as `Failed to fetch`.
+- Hardened the server: `TRUST_PROXY` is opt-in, the global rate limit is 600 requests per minute, and the traffic proxy caches tiles for 60 seconds with a 128-entry cap.
+- Updated `README.md` and `.env.example` to describe Azure Maps, TomTom and INFOTRAFIC, and to drop Google, AIS and camera instructions.
+
+### Verification
+
+- `npm run build` passed TypeScript and the Vite production bundle.
+- `npm test -- --run` passed **86 tests in 20 files** after removing the air, sea and camera suites.
+- Production bundle on port 3002 returned HTTP 200 for `/api/health`, `/api/layers`, `/api/observations?layer=road`, `/api/events?limit=3` and `/api/route`.
+- `/api/layers` reported road traffic as `live` from INFOTRAFIC and no longer listed air, sea or camera layers.
+- `tests/e2e/app.spec.ts` passed **28/28** on the production bundle at `http://127.0.0.1:3002`, desktop and mobile.
+- `tests/e2e/navigation.spec.ts` route-failure cases passed 2/2 and the mobile route-planning case passed after the auto-plan change. The full 38-case navigation run was still executing at the end of this entry; its result is recorded in the next dated entry.
+
+### Limitations
+
+- TomTom live flow is implemented but untested against the live provider because `TOMTOM_API_KEY` is not configured in this checkout. INFOTRAFIC bulletins work without it.
+- Azure Maps traffic tilesets (`microsoft.traffic.flow.relative`, `microsoft.traffic.incidents`) returned "Tileset not found" for this subscription, so Azure is used only for basemap and imagery.
+- No secrets were written to this log. Keys remain only in local `.env`.
+

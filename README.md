@@ -16,23 +16,21 @@ Worldwide search, routing and information panels are supported. Public-provider 
 
 - **Local news** — location-based bottom sheet, in-app article reader and read-aloud controls; map news bubbles are hidden
 - **Weather** — forecasts for the searched location from Open-Meteo with MET Norway fallback; weather imagery remains an internal service
-- **Traffic** — recent active Romanian road bulletins (INFOTRAFIC / Poliția Română) with Bucharest-time timestamps, approximate locality/county context, optional TomTom traffic-flow tiles (licensed key required)
-- **Civil air traffic** — registered, non-military aircraft observations via adsb.lol
-- **Maritime & Danube** — AIS vessel observations via AISStream (API key required, intentionally unconfigured by default)
+- **Traffic** — recent active Romanian road bulletins (INFOTRAFIC / Poliția Română) with Bucharest-time timestamps, approximate locality/county context, plus TomTom traffic-flow tiles when `TOMTOM_API_KEY` is configured
+- **Basemap** — Azure Maps raster streets and satellite imagery via MapLibre; OpenStreetMap/Esri remain fallbacks when no Azure key is configured
 - **Radio** — worldwide stations with direct HTTPS stream playback in-app
-- **Cameras** — public camera directory (Webcam România) with provider players and embeds
 - **Satellites / Earth** — NASA GIBS raster layers, CelesTrak/SGP4 ground tracks, satellite passes over your locality
 - **Navigation** — global routes, automatic rerouting, street-level GPS map following, automatic speed units and mapped speed restrictions
 - **Search and POIs** — nearby-to-worldwide street autocomplete, voice search, map-pin selection, automatic POIs and saved pins
 - **Languages** — English and Romanian interface text
 - **Appearance** — persisted light/dark theme
-- **Admin panel** — authenticated (`ADMIN_TOKEN`), feed enable/disable, event hide/corrections, Google map basemap selector (Off / Streets / Satellite)
+- **Admin panel** — authenticated (`ADMIN_TOKEN`), feed enable/disable, event hide/corrections
 - **Offline-tolerant** — localStorage preferences, SQLite/WAL persistence, corrupted-preference recovery
 
 ## Recent fixes
 
 - **Blank page / JS-CSS MIME error** — `fastifyStatic` was registered with `wildcard:false`, causing `/assets/*.js` and `/assets/*.css` to fall through to the SPA `index.html` fallback (served as `text/html`). Changed to `wildcard:true` in `server/app.ts` so static assets are served directly.
-- **Google Maps layer alternative** — added `VITE_GOOGLE_MAPS_BROWSER_KEY` support; admin can switch basemap between MapLibre+OpenStreetMap (default), Google Streets, or Google Satellite. MapLibre+OSM is the default map; map tiles require network access.
+- **Azure Maps basemap** — MapLibre renders Azure Maps raster tiles (`microsoft.base.road`, `microsoft.imagery`). Without `VITE_AZURE_MAPS_KEY` the map falls back to OpenStreetMap streets and Esri satellite.
 - Current build and validation results are recorded in [APP_REVIEW.md](APP_REVIEW.md).
 
 ## Local development
@@ -43,8 +41,9 @@ npm install
 
 # Configure environment (copy from .env.example, never commit .env)
 # Default navigation, forecasts and POIs require no API key.
-# VITE_GOOGLE_MAPS_BROWSER_KEY=your_google_maps_key  # optional, for Google basemap
-# ADMIN_TOKEN=your_random_token                       # for admin panel
+# VITE_AZURE_MAPS_KEY=your_azure_maps_key            # optional, Azure Maps basemap
+# TOMTOM_API_KEY=your_tomtom_key                     # optional, live traffic flow
+# ADMIN_TOKEN=your_random_token                      # for admin panel
 
 # Start API + web (concurrently)
 npm run dev
@@ -68,6 +67,18 @@ npm run build      # TypeScript + production client
 npm audit          # dependency audit
 ```
 
+## Local news voices
+
+Install Piper and the neural voice models once for local news playback in Arabic, English, French, Hindi, Mandarin Chinese, Romanian, and Spanish. Run this from the project folder in PowerShell:
+
+```powershell
+python -m venv data/tts/venv
+& ./data/tts/venv/Scripts/python.exe -m pip install piper-tts==1.8.0
+& ./data/tts/venv/Scripts/python.exe -m piper.download_voices --data-dir data/tts ar_JO-kareem-medium en_US-lessac-medium es_ES-sharvard-medium fr_FR-siwis-medium hi_IN-pratham-medium ro_RO-mihai-medium zh_CN-huayan-medium
+```
+
+Meridian uses the article language first, with the GPS country as a fallback when the article language is unknown. It uses an installed local voice when available and the online voice service for other languages.
+
 ## Environment variables
 
 | Variable | Purpose | Required |
@@ -76,12 +87,12 @@ npm audit          # dependency audit
 | `HOST` | API bind host (use `0.0.0.0` for LAN/GCP) | No |
 | `PHOTON_URL` | Optional self-hosted Photon autocomplete endpoint | No |
 | `OVERPASS_URL` | Optional Overpass endpoint for route POIs and road limits | No |
-| `VITE_GOOGLE_MAPS_BROWSER_KEY` | Google Maps JavaScript API browser key | Optional (Google basemap) |
+| `VITE_AZURE_MAPS_KEY` | Azure Maps subscription key for the browser basemap | Optional (Azure basemap) |
+| `AZURE_MAPS_KEY` | Server-side Azure Maps key (satellite/metadata parity) | Optional |
 | `ADMIN_TOKEN` | Admin panel authentication token | Yes (for admin) |
-| `AISSTREAM_API_KEY` | AISStream maritime feed key | Optional |
 | `TOMTOM_API_KEY` | TomTom traffic-flow tiles key | Optional |
 | `OPEN_METEO_API_KEY` | Open-Meteo customer API key | Optional |
-| `DISABLE_SCHEDULER` | Set to `1` to disable feed/AIS background jobs | No |
+| `DISABLE_SCHEDULER` | Set to `1` to disable background feed jobs | No |
 
 ## GCP deployment (free tier)
 
@@ -115,9 +126,7 @@ data/            # SQLite WAL database (gitignored)
 
 ## Limitations / status
 
-- AIS maritime/Danube feed: adapter implemented; no real provider session verified because `AISSTREAM_API_KEY` is absent.
-- Aggregated road flow: TomTom adapter implemented; licensed key/budget absent. Official road bulletins work independently.
-- Google Maps demo key works on localhost only with "for development purposes only" watermark. Not for public app or Play Store release.
+- Aggregated road flow: TomTom adapter implemented; add `TOMTOM_API_KEY` to enable live tiles. Official INFOTRAFIC bulletins work independently.
 - Public/commercial release not performed. Provider terms, subscriptions, native editorial review and hosting/monitoring must be settled first.
 - Europe-wide coverage is v2.
 

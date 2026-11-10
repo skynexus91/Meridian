@@ -15,21 +15,21 @@ This backlog is tool-neutral and can be followed by Copilot, OpenCode, or a huma
 ### P0 — Release blockers
 
 - [x] **Map survives saved Google basemap preference / missing Google key.** Local browser smoke checks with both saved Google values (`streets`, `satellite`) confirmed a MapLibre canvas, non-blocking fallback notice, no map failure, and no page errors.
-- [~] **Rate limit is client-aware behind the hosting proxy.** Current local server change configures Fastify `trustProxy` from `TRUST_PROXY` (default one proxy on Render), uses `request.ip`, and raises the global ceiling to 600/min. Client polling skips hidden tabs. Confirm actual proxy chain in deployment and exercise more than one real client; do not assume local evidence proves production behavior.
-- [~] **429 recovery and client feedback (client recovery implemented).** `src/lib.ts` now honors `Retry-After` in seconds or HTTP-date form, holds off polling until the retry time, and exposes a plain-language throttling error while retaining the last successful response. Add regression coverage and verify the visible UI state.
+- [~] **Rate limit is client-aware behind the hosting proxy.** The rate limiter uses `request.ip`. The Render fallback `TRUST_PROXY=1` did not separate clients behind a single peer in the local Fastify fixture. Configure trusted proxy addresses for the actual hosting chain and verify distinct rate-limit buckets from two real clients. See the 9 November audit in the QA log.
+- [~] **429 recovery and client feedback (client recovery implemented).** `src/lib.ts` now honors `Retry-After` in seconds or HTTP-date form, holds off polling until the retry time, and exposes a plain-language throttling error while retaining the last successful response. Unit coverage checks the header formats and missing-header behavior. Verify the visible UI state and recovery under sustained throttling.
+- [ ] **Reject routes whose snapped endpoints are far from the requested locations.** The 9 November audit reproduced an HTTP 200 drive route for a mid-Pacific destination. Bound provider snaps and preserve a distinct no-route status for disconnected coordinates and a server error for provider outages.
 - [ ] **Release gate:** after P0 changes, run typecheck/build, unit suite, map recovery browser scenario, and a real-proxy multi-client load check. Record evidence; do not claim release-ready until all pass.
 
 ### P1 — Reliability and usability before public launch
 
 - [x] **News read aloud language.** Detect supported language from article text, use article/source language metadata when text is too short, and pass GPS country as server voice fallback. Playback uses app-generated neural audio only; a voice service failure is shown instead of calling browser speech synthesis.
-- [~] **Worldwide radio feed and country search.** Default feed now requests popular worldwide stations; the station search accepts station names and country names/codes. Unit and mocked desktop/mobile browser checks pass; direct live directory check is blocked by outbound connection resets.
+- [~] **Location-first radio and worldwide search.** The default feed uses the device GPS country, with worldwide stations when the country is unavailable. Explicit station and country searches remain worldwide. Desktop/mobile request and player fixtures passed. A live Romanian directory sample returned 98 Romanian entries. Real audio playback on supported devices remains open.
 - [ ] Reduce `/api/events` payload and response time. Keep feed summaries small; retrieve article content only when opening an article. Preserve filters, event counts, reader behavior, and cache semantics.
 - [ ] Fix traffic imagery requests above provider zoom limits (accept supported zoom or configure layer max zoom/overzoom); verify during navigation.
-- [ ] Return a clear no-route status for valid but disconnected coordinates; keep provider outages as server errors.
 - [ ] Replace raw validation/provider details with stable, plain-language API errors while retaining diagnostic detail in server logs.
 - [x] **Phone header at 360, 412, and 430 px.** Added a browser regression check; search, nearby places, and voice controls remain visible and inside the viewport at all three widths.
 - [ ] Complete English/Romanian visible-string review, including first-run language, document title, and typo cleanup.
-- [ ] Add browser security headers with a policy compatible with required map, audio, and imagery providers; verify production browser console and deployment HTTPS behavior.
+- [~] **Browser security headers.** CSP, HSTS and Permissions-Policy are present on the local production bundle. Verify HTTPS behavior and provider compatibility on the deployed host.
 - [~] **Browser test migration.** Updated stale specs for current world-news/radio panels, GPS forecast, disabled public cameras, current route planner, and location news. Playwright now starts the local app and waits for its health endpoint. Per-suite passes are being recorded in `ENGINEERING_QA_LOG.md`; full desktop/mobile suite still needs a clean complete run.
 - [ ] Complete accessibility checks for contrast, target sizes, keyboard flow, and robots metadata.
 

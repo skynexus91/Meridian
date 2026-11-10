@@ -6,7 +6,7 @@ export interface Article {image?:string;id:string;sourceId:string;sourceName:str
 export interface NewsEvent {id:string;title:string;country:Country;category:Category;place?:Place;precision:'city'|'country';updatedAt:string;publishedAt:string;articles:Article[];independentSources:number;revisions?:{at:string;note:string}[]}
 export interface Station {streams?:string[];codec?:string;id:string;name:string;country:Country;region:string;city:string;genre:'news'|'music'|'culture';url:string;stream?:string;lat:number;lon:number;rights:string}
 export interface Camera {id:string;name:string;country:Country;place:string;lat?:number;lon?:number;url:string;embed?:string;status:string;rights:string}
-export interface Observation {id:string;kind:'air'|'sea'|'road';lat:number;lon:number;name:string;observedAt:string;heading?:number;speed?:number;altitude?:number;description?:string;source:string}
+export interface Observation {id:string;kind:'road';lat:number;lon:number;name:string;observedAt:string;heading?:number;speed?:number;altitude?:number;description?:string;source:string}
 export interface Airport {id:string;name:string;iata?:string;icao?:string;city:string;region:string;lat:number;lon:number;type:'international'|'regional'|'domestic';rights:string}
 export interface POI {id:string;name:string;type:'fuel'|'hotel'|'motel'|'pension'|'tourist'|'traffic'|'restaurant'|'parking';country?:string;city:string;region:string;lat:number;lon:number;rights:string;phone?:string;address?:string;distKm?:number}
 export interface Radar {id:number;lat:number;lon:number;type:string;maxspeed?:number}

@@ -53,14 +53,14 @@ export function extractArticle(html:string,url:string):Pick<ArticleContent,'titl
 export async function articleReader(id:string){
  const article=readArticles().find(a=>a.id===id&&a.country==='RO');
  const source=article&&sources.find(s=>s.id===article.sourceId);
- if(!article||!source)throw Object.assign(Error('Articolul nu este disponibil.'),{statusCode:404});
+ if(!article||!source)throw Object.assign(Error('Article not available.'),{statusCode:404});
  const host=(value:string)=>new URL(value).hostname.replace(/^www\./,'');
- if(host(article.url)!==host(source.url))throw Object.assign(Error('Articolul redirecționează către altă redacție.'),{statusCode:422});
+ if(host(article.url)!==host(source.url))throw Object.assign(Error('Article redirects to a different publisher.'),{statusCode:422});
  return cached('article-reader:'+id,1800000,async()=>{
   const response=await fetchText(article.url,{'User-Agent':'Meridian/0.1 (local article reader)'});
-  if(host(response.response.url)!==host(source.url))throw Error('Redirecționarea articolului nu a putut fi verificată.');
+  if(host(response.response.url)!==host(source.url))throw Error('Article redirect verification failed.');
   const content=extractArticle(response.body,article.url);
-  if(!content.blocks.length)throw Error('Redacția nu oferă text public accesibil pentru citirea în aplicație.');
+  if(!content.blocks.length)throw Error('Publisher offers no public text for in-app reading.');
   return {...content,language:content.language??languageTag(article.language),id:article.id,url:article.url,source:article.sourceName,publishedAt:article.publishedAt};
  });
 }

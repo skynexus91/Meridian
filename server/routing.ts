@@ -24,8 +24,11 @@ function decodePolyline(str:string,precision=1e5):number[][]{
  }
  return coords;
 }
-const NO_ROUTE='Nu s-a găsit o rută auto între punctele alese.';
-function noRoute(){return Object.assign(Error(NO_ROUTE),{statusCode:422});}
+const NO_ROUTE=(ro:boolean)=>ro?'Nu s-a găsit o rută auto între punctele alese.':'No driving route found between the selected points.';
+function noRoute(ro=false){return Object.assign(Error(NO_ROUTE(ro)),{statusCode:422});}
+const MAX_SNAP_M=50000;
+function haversineM(a:number[],b:number[]){const R=6371000;const dLat=(b[1]-a[1])*Math.PI/180;const dLon=(b[0]-a[0])*Math.PI/180;const x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a[1]*Math.PI/180)*Math.cos(b[1]*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+function snapOk(start:[number,number],end:[number,number],route:DrivingRoute){const g=route.geometry.coordinates;if(g.length<2)return false;const s=g[0];const e=g[g.length-1];return haversineM(start,s)<=MAX_SNAP_M&&haversineM(end,e)<=MAX_SNAP_M;}
 async function valhallaRoute(startLon:number,startLat:number,endLon:number,endLat:number):Promise<DrivingRoute>{
  const body=JSON.stringify({locations:[{lat:startLat,lon:startLon},{lat:endLat,lon:endLon}],costing:'auto',units:'km'});
  const res=await fetch(VALHALLA_URL+'/route',{method:'POST',headers:{'Content-Type':'application/json'},body,signal:AbortSignal.timeout(15000)});
@@ -53,7 +56,7 @@ async function tomtomRoute(startLon:number,startLat:number,endLon:number,endLat:
   const point=instruction.point;const location=Array.isArray(point)?[point[1],point[0]]:point&&Number.isFinite(point.longitude)&&Number.isFinite(point.latitude)?[point.longitude,point.latitude]:undefined;
   return {type:instruction.maneuver,modifier:instruction.combinedMessage,name:instruction.street,exit:instruction.exitNumber,instruction:instruction.message??instruction.combinedMessage??instruction.maneuver??'Continue',location,distance:instruction.routeOffsetInMeters??0};
  }).filter((step:any)=>Array.isArray(step.location)&&step.location.length===2);
- return {steps,distance:summary.lengthInMeters,duration:summary.travelTimeInSeconds,geometry:{type:'LineString',coordinates:points},provider:'TomTom',calculatedAt:new Date().toISOString()};
+ return {steps,distance:summary.lengthInMeters,duration:summary.travelTimeInSeconds,geometry:{type:'LineString',coordinates:points},provider:'TomTom · live traffic',calculatedAt:new Date().toISOString()};
 }
 async function osrmRoute(startLon:number,startLat:number,endLon:number,endLat:number):Promise<DrivingRoute>{
  const coordinates=startLon+','+startLat+';'+endLon+','+endLat;
@@ -77,6 +80,7 @@ export async function drivingRoute(query:z.infer<typeof routeQuery>){
  if(!route)route=await attempt(()=>osrmRoute(query.startLon,query.startLat,query.endLon,query.endLat));
  if(!route&&!noRouteError){await new Promise(resolve=>setTimeout(resolve,500));route=await attempt(()=>osrmRoute(query.startLon,query.startLat,query.endLon,query.endLat));}
  if(!route)throw noRouteError??Object.assign(Error(lastError?'Routing service unavailable':'No routing provider configured'),{statusCode:502});
+const start:[number,number]=[query.startLon,query.startLat];const end:[number,number]=[query.endLon,query.endLat];if(!snapOk(start,end,route))throw noRoute();
  const result:DrivingRoute={...route};
  if(cache.size>=50)cache.delete(cache.keys().next().value!);
  cache.set(coordinates,{at:Date.now(),route:result});

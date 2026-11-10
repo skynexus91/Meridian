@@ -11,7 +11,7 @@ export async function roadDetail(url:string){
   const body=content.length?content:$('article').first();
   body.find('script,style,nav,footer,form').remove();
   const paragraphs=body.find('p').map((_,el)=>$(el).text().replace(/\s+/g,' ').trim()).get().filter(p=>p.length>25);
-  if(!paragraphs.length)throw Error('Buletinul detaliat nu este disponibil momentan.');
+  if(!paragraphs.length)throw Error('Detailed bulletin unavailable at the moment.');
   return {paragraphs:paragraphs.slice(0,35),source:'Poliția Română · INFOTRAFIC',url};
  });
 }
@@ -42,6 +42,6 @@ export async function cameraPlayer(id:string,host='127.0.0.1'){
   const variantThumbnail=/"thumbnail":"([^"]+)"/.exec(metadata)?.[1];
   const thumbnail=variant?(variantThumbnail?new URL(variantThumbnail,camera.url).href:undefined):$('meta[property="og:image"]').attr('content');
   const preview=thumbnail?.startsWith('https://webcamromania.ro/media/snapshots/')?thumbnail:undefined;
-  return {embed,preview,restriction:restriction??(!embed?'Furnizorul nu publică un player integrabil pentru această cameră.':undefined),source:camera.url};
+  return {embed,preview,restriction:restriction??(!embed?'Publisher does not offer an embeddable player for this camera.':undefined),source:camera.url};
  });
 }
