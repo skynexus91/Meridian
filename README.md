@@ -61,6 +61,7 @@ Every Markdown document in the project root:
 | [PRODUCTION_READINESS_REPORT.md](PRODUCTION_READINESS_REPORT.md) | Production readiness assessment. |
 | [PRODUCTION_REPORT.md](PRODUCTION_REPORT.md) | Production verification report. |
 | [PRODUCTION_TESTING.md](PRODUCTION_TESTING.md) | Release and staging test checklist. |
+| [PRODUCTION_DEPLOY_CHECKLIST.md](PRODUCTION_DEPLOY_CHECKLIST.md) | Step-by-step production deploy, verification, security and rollback checklist. |
 | [QA_REVIEW.md](QA_REVIEW.md) | QA findings and regression notes. |
 | [QA_STATUS_BRIEF.md](QA_STATUS_BRIEF.md) | Short QA status summary. |
 | [SOURCE_INVENTORY.md](SOURCE_INVENTORY.md) | Source and provider inventory. |
