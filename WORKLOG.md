@@ -139,6 +139,17 @@ succeeds.
 
 ---
 
+## 10. Provider order, merge and beta hardening
+- Merged `origin/main` locally as a union of both feature lines (commit `99ac51c`, not pushed). Air/AIS features stay removed.
+- New `src/basemap.ts`: Azure Maps raster (`microsoft.base.road`) is the first basemap when `VITE_AZURE_MAPS_KEY` exists; TomTom Orbis is second; OpenStreetMap streets and Esri imagery are the free fallback.
+- Basemap tile failure (2.5 s) now swaps to OpenStreetMap instead of only showing a warning. `data-basemap` on the map container reports the active provider.
+- Removed the TomTom style `include:[]` filter, which hid city labels and landuse.
+- Restored merge-lost wiring: offline banner, keyboard shortcuts `L/N/W/R/M/?`, and `/api/gps/snap` speed limit feeding `NavigationPanel`.
+- `src/ReadAloud.tsx`: when `/api/voice/tts` fails, read-aloud falls back to the browser `speechSynthesis`, including pause, resume and stop.
+- `src/LocalNewsSheet.tsx`: news dock starts collapsed so it no longer covers the map on first load; drag and tap still expand it.
+- `src/MapView.tsx`: POIs sharing a coordinate are fanned out in a small ring, so overlapping markers are individually tappable.
+- Verification: `npx tsc --noEmit` clean, `npm test` 108/108, `npm run build` OK. `tests/e2e/app.spec.ts` passed 15/15 desktop and 15/15 mobile. POI click and touch open the matching inspector on both viewports.
+
 ## Open items (not blocking)
 - Route alternatives (TomTom `maxAlternatives`) and avoid options.
 - Render deployment: needs explicit user confirmation.

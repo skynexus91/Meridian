@@ -34,6 +34,10 @@ Method: Playwright flows (`scripts/ux-audit.mjs`), accessibility audit of button
 6. **Offline banner** — appears on `offline`, clears on `online`, bilingual.
 7. **Keyboard shortcuts** — `L` locate, `N` news, `W` weather, `R` radio, `M` list/map, `?` shortcut list, `Esc` closes overlays.
 8. **Voice guidance** — announces at ~400 m and ~150 m before each maneuver.
+9. **Basemap order** — Azure Maps first, TomTom Orbis second, OpenStreetMap/Esri fallback; the map swaps to OpenStreetMap when tiles fail.
+10. **POI overlap** — markers that share a coordinate fan out on a small ring, so each POI can be clicked or tapped. Verified on desktop 1440×900 and Pixel 7.
+11. **Read-aloud resilience** — browser `speechSynthesis` takes over when the app voice service is unavailable; pause, resume and stop work in both modes.
+12. **News dock** — starts collapsed so the map stays visible, and expands by drag or tap.
 
 ## Recommended next (not implemented yet)
 - **Route alternatives**: TomTom `maxAlternatives` returns up to three routes; show distance, ETA and traffic delay per option, with a "fastest / shortest / avoid tolls" toggle.

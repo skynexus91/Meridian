@@ -662,3 +662,6 @@ html[data-theme="dark"] .route-sheet .sheet-actions .btn-ghost:hover {
 .app:has(.voice-call-panel) .drive-share-panel {top:auto;bottom:14px}
 .radio-geography{margin:0 16px 12px}.radio-geography button{min-height:40px}.radio-geography button:disabled{opacity:.5}
 .voice-call-actions button{display:inline-flex;align-items:center;gap:8px;min-height:44px}.voice-call-actions .voice-call-start{background:#147553;color:#fff}.voice-call-actions .voice-call-end{background:#b3333e;color:#fff}.voice-call-actions button:disabled{opacity:.45;cursor:default}
+
+/* Provider credits stay in the map metadata. The always-visible strip is hidden to keep the map edge clear. */
+.tomtom-attribution-logos,.maplibregl-ctrl-attrib{display:none!important}

@@ -5,7 +5,7 @@ import {useTranslation} from './i18n';
 import {useEffect,useRef,useState,type RefObject} from 'react';
 import * as maplibregl from 'maplibre-gl';
 import {type Map as MapType,type GeoJSONSource} from 'maplibre-gl';
-import {createBasemapMap,applyBasemap} from './basemap';
+import {createBasemapMap,applyBasemap,basemapStyle} from './basemap';
 import type {EarthLayer,OrbitalSatellite,NewsEvent,Place,Observation,WeatherFrame,Camera,Station,POI} from './types';
 import {LocateFixed,Plus,Minus,Map as MapIcon} from 'lucide-react';
 type MarkerItem={id:string;name:string;lon:number;lat:number};
@@ -38,6 +38,23 @@ function updateMarkers<T extends MarkerItem>(map:MapType,entries:Map<string,Mark
   }
  }
  for(const id of remaining){entries.get(id)?.marker.remove();entries.delete(id);}
+}
+
+function spreadMarkers<T extends MarkerItem>(entries:Map<string,MarkerEntry<T>>,items:T[]){
+ const groups=new Map<string,T[]>();
+ for(const item of items){
+  const key=item.lat.toFixed(4)+','+item.lon.toFixed(4);
+  const list=groups.get(key);
+  if(list)list.push(item);else groups.set(key,[item]);
+ }
+ for(const item of items){
+  const entry=entries.get(item.id);if(!entry)continue;
+  const group=groups.get(item.lat.toFixed(4)+','+item.lon.toFixed(4))!;
+  if(group.length<2){entry.marker.setOffset([0,0]);continue;}
+  const angle=(2*Math.PI*group.indexOf(item))/group.length;
+  const radius=Math.min(26,10+group.length*2);
+  entry.marker.setOffset([Math.round(Math.cos(angle)*radius),Math.round(Math.sin(angle)*radius)]);
+ }
 }
 
 function markerIcon(path:string,size=16){
@@ -134,8 +151,12 @@ export default function MapView(p:Props){const tr=useTranslation();const element
   basemapFailure=setTimeout(()=>{
    basemapFailure=undefined;
    if(basemapLoaded)return;
-   if(element.current&&element.current.dataset.basemap!=='osm'){
-    try{applyBasemap(m,'osm',latest.current.theme==='dark');element.current.dataset.basemap='osm';setTileError(false);return;}catch{}
+   const element0=element.current;
+   if(styleFailure&&element0&&element0.dataset.basemap!=='osm'){
+    try{m.setStyle(basemapStyle('osm',latest.current.theme==='dark'));element0.dataset.basemap='osm';setTileError(false);return;}catch{}
+   }
+   if(element0&&element0.dataset.basemap!=='osm'){
+    try{applyBasemap(m,'osm',latest.current.theme==='dark');element0.dataset.basemap='osm';setTileError(false);return;}catch{}
    }
    setTileError(true);
   },2500);
@@ -149,9 +170,11 @@ export default function MapView(p:Props){const tr=useTranslation();const element
  },[ready,p.observations,p.cameras,p.stations]);
  useEffect(()=>{
   if(!ready||!map.current)return;
-  updateMarkers(map.current,poiMarkers.current,p.pois.slice(0,60),'poi-marker',poi=>poiIcons[poi.type]??poiIcons.tourist,poi=>{
+  const visible=p.pois.slice(0,60);
+  updateMarkers(map.current,poiMarkers.current,visible,'poi-marker',poi=>poiIcons[poi.type]??poiIcons.tourist,poi=>{
    if(!latest.current.pickingPin)latest.current.onPoi(poi);
   });
+  spreadMarkers(poiMarkers.current,visible);
  },[ready,p.pois]);
  useEffect(()=>{
   if(!ready||!map.current)return;

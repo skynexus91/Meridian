@@ -9,7 +9,7 @@ export function createTomTomMap(options:Omit<MapOptions,'style'>,dark=false){
  prepareMapLibre();
  return new TomTomMap({
   commonBaseURL:location.origin+'/api/tomtom-map',
-  style:{type:'standard',id:dark?'streetDarkDriving':'streetLightDriving',include:[]},
+  style:{type:'standard',id:dark?'streetDarkDriving':'streetLightDriving'},
   mapLibre:options,
  });
 }

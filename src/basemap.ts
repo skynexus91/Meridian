@@ -38,8 +38,8 @@ export function applyBasemap(map:MapType,provider:'azure'|'osm',dark:boolean){
 export function createBasemapMap(container:HTMLElement,options:Omit<MapOptions,'style'|'container'>,dark:boolean):{map:MapType;provider:BasemapProvider}{
  prepareMapLibre();
  if(hasAzure()){
-  try{return {map:new maplibregl.Map({...options,container,style:basemapStyle('azure',dark)}),provider:'azure'};}catch{}
+  try{return {map:new maplibregl.Map({...options,container,style:basemapStyle('azure',dark),attributionControl:false}),provider:'azure'};}catch{}
  }
  try{return {map:createTomTomMap({...options,container},dark).mapLibreMap,provider:'tomtom'};}catch{}
- return {map:new maplibregl.Map({...options,container,style:basemapStyle('osm',dark)}),provider:'osm'};
+ return {map:new maplibregl.Map({...options,container,style:basemapStyle('osm',dark),attributionControl:false}),provider:'osm'};
 }

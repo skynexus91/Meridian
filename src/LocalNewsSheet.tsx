@@ -6,7 +6,7 @@ import WorldArticleReader from './WorldArticleReader';
 import type {Place} from './types';
 interface Story{id:string;title:string;source:string;at:string}
 export default function LocalNewsSheet({place,language,gpsCountry,onLocate,onWeather,onTraffic,roadCount,locationLoading,locationError}:{place?:Place;language:string;gpsCountry?:string;onLocate:()=>void;onWeather:()=>void;onTraffic:()=>void;roadCount?:number;locationLoading?:boolean;locationError?:string}){
- const dock=useDock(false);const ro=language==='ro';const [expanded,setExpanded]=useState(false);const [reading,setReading]=useState<Story>();const locality=place?.region||place?.name.split(',')[0];const query=new URLSearchParams({q:locality??'',lang:language,...(place?.country?{country:place.country}:{})});const news=useApi<{data?:{stories:Story[]};error?:string;stale?:boolean}>(locality?'/api/world/news?'+query:undefined,300000);
+ const dock=useDock();const ro=language==='ro';const [expanded,setExpanded]=useState(false);const [reading,setReading]=useState<Story>();const locality=place?.region||place?.name.split(',')[0];const query=new URLSearchParams({q:locality??'',lang:language,...(place?.country?{country:place.country}:{})});const news=useApi<{data?:{stories:Story[]};error?:string;stale?:boolean}>(locality?'/api/world/news?'+query:undefined,300000);
  useEffect(()=>{setReading(undefined);setExpanded(false);},[locality]);
  const weather=useApi<{data?:{current?:{temperature_2m?:number}};stale?:boolean}>(place?`/api/weather/current?lat=${place.lat}&lon=${place.lon}`:undefined,600000);
  const temperature=weather.data?.data?.current?.temperature_2m;
