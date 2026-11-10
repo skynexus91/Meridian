@@ -1,6 +1,22 @@
 # OpenCode handoff — Meridian GPS
 
-Updated: 7 November 2026, Europe/Bucharest. Workspace: `C:\Users\skynexus\Documents\gods eye view romania`.
+Updated 9 November 2026, Europe/Bucharest. Active workspace `C:\Users\skynexus\.codex\worktrees\9956\gods eye view romania`.
+
+## Current checkout
+
+- Continue improving Meridian and verify each change. Keep the QA log and this handoff current so OpenCode can pick up when the user reports 10% usage remaining. The goal status API does not expose the account usage percentage.
+- The latest local direction is nearby discovery on mobile, with an explicit Map layers control and a right-side inspector on desktop. This supersedes the older note below about hiding layer controls. Navigation starts only after **Start GPS**, even when users explicitly calculate the route.
+- Local review fixed legacy numeric `TRUST_PROXY` startup failures, repaired inconsistent article dates in SQLite, and kept map overlay selection from competing with route pin picking. Use a trusted proxy IP or CIDR if deployed behind a reverse proxy.
+- Nearby browse, forecast layout, route preview, and layer toggles passed six focused browser checks on the production build. The map inspector now shares a shell across POIs and observations and places the selected marker in the map area beside or above the panel. The final inspector build, 93 unit tests, and four focused desktop and mobile browser checks passed.
+- Map place and road markers now update by feature ID. The duplicate hidden place layer is gone, and place categories use outline icons. The inspector browser spec asserts that unchanged marker buttons survive selection, saving, and unrelated layer updates.
+- The inspector, layers, and information panels now move keyboard focus to their heading and restore it when dismissed. The nearby and inspector browser tests exercise Enter, Tab, Escape, and focus restoration.
+- The News map layer now shows optional individual report pins, with the most recently updated city-level report at each location. It starts off and stays hidden during guidance. The map opens the existing event detail with keyboard focus. No cluster layers remain.
+- The weather imagery dock tracks selected observations by timestamp and waits for usable imagery before advancing. Failed frame requests pause playback and expose a retry. The fixture-based browser case covers radar recovery and switching to satellite imagery.
+- Traffic keeps cached official bulletins visible with a last-update time and distinguishes a current empty feed from an unavailable one. The nearby dock opens the national feed without a selected location, and traffic headlines open in the shared reader.
+- Route projection caches segment lengths per immutable geometry array. Guidance measures the distance along the route with a fixed maneuver tolerance and reprojects the last GPS fix when a reroute arrives. Local endpoints resolve without the pause reserved for two remote lookups. The QA log contains the synthetic comparison and reroute test scope.
+- Changes are in the current worktree. Older preview ports, source paths, and production status below are historical. Run `npm run build` then `npm run test:e2e:prod` or `npm run test:release`. Both browser commands launch an isolated production server on port 4173 by default. Set `TEST_BASE_URL` only to test a production server that is already running.
+- See [ENGINEERING_QA_LOG.md](ENGINEERING_QA_LOG.md) for check results, screenshots, and known coverage gaps.
+- The latest work adds voice invitations, live drive sharing, opt-in offline telemetry, route-side commercial discovery, driver advisories, and a private peak OSRM profile. See [ADVANCED_FEATURES.md](ADVANCED_FEATURES.md) for deployment, exact schema paths, protocol boundaries, and staging requirements.
 
 ## User intent and latest additions
 
@@ -117,3 +133,10 @@ Public routing does not include live traffic ETA. TomTom flow needs an existing 
 - Docks now default to a 30 px drag/tap handle. `useDock` retains its own expanded state; route-field collapse is separate. Recent places are persisted (max 8); voice search is available in collapsed top search; mobile voice guidance is accessible.
 - Voice layer: server Edge neural TTS (`/api/voice/tts`, ~400 calm voices worldwide) for news read-aloud; server Whisper STT (`/api/voice/transcribe`, 99 languages) for voice search, both with browser fallbacks. TTS voice follows device language, falling back to location-language by country.
 - No Render deployment or Git push has happened. Local preview remains `http://127.0.0.1:3002/`.
+
+## Advanced navigation and communications
+
+- See [ADVANCED_FEATURES.md](ADVANCED_FEATURES.md) for the source files, endpoint contracts, configuration, storage rules, and deployment checks. See [ENGINEERING_QA_LOG.md](ENGINEERING_QA_LOG.md) for the run history.
+- The latest production build passed and 101 Vitest checks passed across 24 files. The focused Chromium matrix covers WebRTC audio and hangup, acknowledged live-share revocation, offline telemetry, and corridor POIs and mapped hazards.
+- Follow-up verification passed 102 Vitest checks and ten production Chromium cases. Production logging now strips request query strings and emits voice and share lifecycle events. The live corridor probe degraded cleanly, and failed or incomplete Overpass refreshes now retain cached results and back off for 30 seconds. The QA log records the interrupted 116-case baseline and the focused reruns.
+- The worldwide POI inspector now calculates a driving route from device GPS to the selected place and hands off to the existing GPS guidance. Photon and Overpass cover additional business and landmark categories, and Valhalla routes include maneuver instructions. The current production build and 104 Vitest cases passed. The QA log includes the London provider probe and browser results.

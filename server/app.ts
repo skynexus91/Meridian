@@ -1,9 +1,16 @@
+import {corridorQuery,routeCorridorPois} from './route-corridor.js';
+import {registerAnalytics} from './analytics.js';
+import {registerDriveShare} from './drive-share.js';
+import websocket from '@fastify/websocket';
+import {registerSignals} from './signals.js';
+import {registerTomTomMap} from './tomtom-map.js';
 import {openPois} from './open-pois.js';
 import {suggestPlaces} from './suggestions.js';
 import {speedRoads} from './speed-roads.js';
 import {snapGps} from './mapmatch.js';
 import {worldArticleReader} from './world-reader.js';
 import {worldNews,worldRadio} from './world.js';
+import {radioScopes} from '../src/radioGeography.js';
 import {synthesize,transcribe} from './voice.js';
 import {searchAddresses,reverseLocation} from './geocoding.js';
 import {articleReader} from './articles.js';
@@ -32,14 +39,24 @@ import {getWarnings} from './warnings.js';
 import {socialHtml} from './share.js';
 import type {NewsEvent,Station,Camera,Airport,POI} from '../src/types.js';
 export async function buildApp(){
- const proxyRaw=process.env.TRUST_PROXY??(process.env.RENDER?'true':'');const trustProxy=proxyRaw==='true'||proxyRaw==='1';
- const app=Fastify({logger:process.env.NODE_ENV==='production',bodyLimit:16384,trustProxy});
+ const proxy=(process.env.TRUST_PROXY??(process.env.RENDER?'true':'')).trim();
+ // Fastify requires a trusted peer address or CIDR. Legacy hop counts fail closed.
+ const trustProxy=proxy==='true'?true:proxy!=='true'&&proxy!==''&&proxy!=='false'&&!/^\d+$/.test(proxy)?proxy:false;
+ const app=Fastify({logger:process.env.NODE_ENV==='production'?{
+  serializers:{req:(request)=>({method:request.method,url:request.url.split('?')[0]})},
+  redact:['req.headers.authorization','headers.authorization'],
+ }:false,bodyLimit:16384,trustProxy});
  app.addContentTypeParser(['audio/webm','audio/ogg','audio/mpeg','audio/mp4','audio/wav','audio/x-wav','audio/flac','application/octet-stream'],{parseAs:'buffer',bodyLimit:12*1024*1024},(_req,body,done)=>done(null,body as Buffer));
+ await app.register(websocket,{options:{maxPayload:20000,perMessageDeflate:false}});
  await app.register(compress,{globalDecompression:false,encodings:["br","gzip"]});
  const trusted=new Set<string>(['127.0.0.1','::1','localhost']);
-  await app.register(rateLimit,{max:600,timeWindow:'1 minute',keyGenerator:request=>{const fwd=request.headers['x-forwarded-for'];const ip=trustProxy&&fwd&&typeof fwd==='string'?fwd.split(',')[0].trim():request.ip;return trusted.has(ip)?request.ip:ip;},allowList:request=>!request.url.startsWith('/api/')||trusted.has(request.ip)});
+ await app.register(rateLimit,{max:600,timeWindow:'1 minute',keyGenerator:request=>{const fwd=request.headers['x-forwarded-for'];const ip=trustProxy&&fwd&&typeof fwd==='string'?fwd.split(',')[0].trim():request.ip;return trusted.has(ip)?request.ip:ip;},allowList:request=>!request.url.startsWith('/api/')||trusted.has(request.ip)});
+ registerSignals(app);
+ registerDriveShare(app);
+ registerAnalytics(app);
+ registerTomTomMap(app);
  app.addHook('onSend',async(_req,reply)=>{reply.header('X-Content-Type-Options','nosniff');reply.header('Referrer-Policy','strict-origin-when-cross-origin');reply.header('X-Frame-Options','SAMEORIGIN');reply.header('Strict-Transport-Security','max-age=31536000; includeSubDomains');reply.header('Permissions-Policy','geolocation=(self), camera=(), microphone=(self)');reply.header('Content-Security-Policy',"default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; worker-src 'self' blob:; child-src 'self' blob:; frame-src 'self' https:");});
- app.setErrorHandler((error,req,reply)=>{const explicit=(error as {statusCode?:number}).statusCode;const zod=error instanceof z.ZodError;const status=typeof explicit==='number'&&Number.isInteger(explicit)&&explicit>=400&&explicit<=599?explicit:zod?400:500;if(zod)req.log.warn({issues:error.issues},'Invalid request parameters');else if(status>=400&&status<500)req.log.warn({message:error instanceof Error?error.message:String(error)},'Client error');reply.code(status>=500?500:status).send({error:status>=500?'Service temporarily unavailable':zod?'Invalid request parameters':(error instanceof Error?error.message.replace(/[^\w\s.:@-]/g,'')?.slice(0,200):'Invalid request')});});
+ app.setErrorHandler((error,req,reply)=>{const explicit=(error as {statusCode?:number}).statusCode;const zod=error instanceof z.ZodError;const status=typeof explicit==='number'&&Number.isInteger(explicit)&&explicit>=400&&explicit<=599?explicit:zod?400:500;if(zod)req.log.warn({issues:error.issues.map(({code,path})=>({code,path}))},'Invalid request parameters');else if(status>=400&&status<500)req.log.warn({message:error instanceof Error?error.message:String(error)},'Client error');if(status>=500)req.log.error({status},'Request failed');reply.code(status>=500?500:status).send({error:status>=500?'Service temporarily unavailable':zod?'Invalid request parameters':(error instanceof Error?error.message.replace(/[^\w\s.:@-]/g,'')?.slice(0,200):'Invalid request')});});
  app.get('/api/health',async()=>({ok:true,app:'meridian',version:'0.1.0',mode:'local-evaluation',now:new Date().toISOString()}));
  app.get('/api/sources',async()=>{const articles=readArticles();return {sources:sources.map(s=>{const override=get<Partial<typeof s>>(`override:${s.id}`)??{};const state=sourceState(s.id);const count=articles.filter(a=>a.sourceId===s.id).length;return {...s,...override,...state,articles:count,status:!s.enabled?'disabled':state.error?(state.lastSuccess?'stale':'error'):state.lastSuccess?(Date.now()-Date.parse(state.lastSuccess)>2700000?'stale':'live'):'disabled'};})};});
  const querySchema=z.object({country:z.enum(['RO']).optional(),category:z.string().max(40).optional(),q:z.string().max(200).optional(),region:z.string().max(80).optional(),place:z.string().max(80).optional(),places:z.string().max(2000).optional(),language:z.string().max(10).optional(),type:z.string().max(20).optional(),since:z.iso.datetime().optional(),bbox:z.string().max(100).optional(),limit:z.coerce.number().int().min(1).max(100).default(50),offset:z.coerce.number().int().min(0).max(2000).default(0)});
@@ -53,7 +70,10 @@ export async function buildApp(){
  app.get<{Params:{id:string}}>('/api/articles/:id',async(req)=>articleReader(req.params.id));
  app.get('/api/world/article/:id',async(req)=>{const p=z.object({id:z.string().regex(/^[a-f0-9]{8,64}$/)}).parse(req.params);return worldArticleReader(p.id);});
  app.get('/api/world/news',{config:{rateLimit:{max:30,timeWindow:'1 minute'}}},async(req)=>{const q=z.object({q:z.string().max(180).default(''),traffic:z.enum(['true','false']).default('false'),lang:z.enum(['en','ro']).default('en'),country:z.string().regex(/^[A-Z]{2}$/).optional()}).parse(req.query);return worldNews(q.q,q.traffic==='true',q.lang,q.country);});
- app.get('/api/world/radio',{config:{rateLimit:{max:30,timeWindow:'1 minute'}}},async(req)=>{const q=z.object({country:z.string().regex(/^[A-Z]{2}$/).optional(),name:z.string().max(100).default('')}).parse(req.query);return worldRadio(q.country??'',q.name);});
+ app.get('/api/world/radio',{config:{rateLimit:{max:30,timeWindow:'1 minute'}}},async(req)=>{
+  const q=z.object({country:z.string().regex(/^[A-Z]{2}$/).optional(),name:z.string().max(100).default(''),scope:z.enum(radioScopes).optional(),city:z.string().max(150).optional(),region:z.string().max(150).optional(),lat:z.coerce.number().min(-90).max(90).optional(),lon:z.coerce.number().min(-180).max(180).optional()}).refine(value=>!value.scope||!!value.country).parse(req.query);
+  return worldRadio(q.country??'',q.name,q.scope?{...q,scope:q.scope}:undefined);
+ });
  app.get('/api/voice/capabilities',async()=>({transcription:process.env.VOICE_STT_ENABLED==='1',neuralSpeech:true}));
  app.get('/api/voice/tts',{config:{rateLimit:{max:30,timeWindow:'1 minute'}}},async(req,reply)=>{const q=z.object({t:z.string().min(1).max(2000),lang:z.string().regex(/^[A-Za-z]{2}(-[A-Za-z0-9]{2,6})?$/).optional(),country:z.string().regex(/^[A-Za-z]{2}$/).optional()}).parse(req.query);const r=await synthesize(q.t,q.lang,q.country);if(!r.ok||!r.audio)return reply.code(503).send({error:'Speech not available'});reply.header('content-type',r.mime);return reply.send(r.audio);});
  app.post('/api/voice/transcribe',{config:{rateLimit:{max:20,timeWindow:'1 minute'}}},async(req,reply)=>{if(process.env.VOICE_STT_ENABLED!=='1')return reply.code(503).send({error:'Server transcription is not configured. Use browser voice search.'});const ctype=String(req.headers['content-type']??'').split(';')[0].trim().toLowerCase();const ok=/^audio\/(webm|ogg|mpeg|mp4|wav|x-wav|flac)$/.test(ctype);if(!ok)return reply.code(415).send({error:'Unsupported audio content type'});const body=await req.body as Buffer;if(!Buffer.isBuffer(body)||body.length<100)return reply.code(400).send({error:'Missing audio payload'});const r=await transcribe(body,String(req.headers['x-filename']??'audio.webm'));if(!r.ok)return reply.code(503).send({error:'Transcription not available'});return {ok:true,text:r.text,language:r.language};});
@@ -66,7 +86,7 @@ export async function buildApp(){
  app.get('/api/places',async()=>({places}));
  app.get('/api/stations',async()=>({stations:stations.map(s=>({...s,...get<Partial<Station>>(`station:${s.id}`)}))}));
  app.get('/api/airports',async(req)=>{const q=z.object({lat:z.coerce.number().optional(),lon:z.coerce.number().optional(),radius:z.coerce.number().default(10)}).parse(req.query);const lat=q.lat;const lon=q.lon;const radiusKm=q.radius;if(typeof lat!=='number'||typeof lon!=='number')return {airports:[]};const dist=(a:any)=>Math.hypot(a.lat-lat,(a.lon-lon)*Math.cos(lat*Math.PI/180))*111;const list=airports.map(a=>({...a,distKm:Math.round(dist(a)*10)/10})) as any;return {airports:list.filter((a:any)=>a.distKm<=radiusKm).sort((a:any,b:any)=>a.distKm-b.distKm),center:{lat,lon},radiusKm};}); app.get('/api/pois',{config:{rateLimit:{max:20,timeWindow:'1 minute'}}},async(req)=>{const q=z.object({lat:z.coerce.number().min(-85).max(85),lon:z.coerce.number().min(-180).max(180),radius:z.coerce.number().min(.2).max(3).default(1.2),type:z.string().max(30).optional()}).parse(req.query);const result=await openPois([[q.lon,q.lat]],q.radius*1000,q.type);return {pois:result.data?.pois.filter(p=>!q.type||p.type===q.type)??[],stale:result.stale,error:result.error};});
- app.get('/api/route-pois',{config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async(req)=>{const q=z.object({points:z.string().max(1500),type:z.string().max(30).optional()}).parse(req.query);let raw:unknown;try{raw=JSON.parse(q.points);}catch{return {data:{pois:[]},stale:true,error:'Invalid route points'};}const points=z.array(z.tuple([z.number().finite().min(-180).max(180),z.number().finite().min(-85).max(85)])).min(1).max(7).parse(raw);return openPois(points,1200,q.type);});
+ app.get('/api/route-pois',{config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async(req)=>{const q=z.object({points:z.string().max(1500).optional(),boxes:z.string().max(1500).optional(),type:z.string().max(30).optional()}).parse(req.query);let raw:unknown;try{raw=JSON.parse(q.boxes??q.points??'');}catch{return {data:{pois:[]},stale:true,error:'Invalid route points'};}if(q.boxes)return routeCorridorPois(corridorQuery.parse(raw));const points=z.array(z.tuple([z.number().finite().min(-180).max(180),z.number().finite().min(-85).max(85)])).min(1).max(7).parse(raw);return openPois(points,1200,q.type);});
  app.get('/api/camera-player',async(req)=>{const q=z.object({id:z.string().max(500)}).parse(req.query);return cameraPlayer(q.id,req.hostname.split(":")[0]);});
  app.get('/api/radars',async(req)=>{const q=z.object({south:z.coerce.number().min(-90).max(90),west:z.coerce.number().min(-180).max(180),north:z.coerce.number().min(-90).max(90),east:z.coerce.number().min(-180).max(180)}).parse(req.query);try{const url='https://overpass-api.de/api/interpreter?data='+encodeURIComponent('[out:json][timeout:25];node["highway"="speed_camera"]('+q.south+','+q.west+','+q.north+','+q.east+');out;');const r=await fetch(url,{signal:AbortSignal.timeout(25000)});if(!r.ok)return {radars:[]};const data=await r.json();const radars=(data.elements??[]).map((n:any)=>({id:n.id,lat:n.lat,lon:n.lon,type:n.tags.camera_type??'speed_camera',maxspeed:n.tags.maxspeed?Number(n.tags.maxspeed):undefined}));return {radars};}catch{return {radars:[]}}});
  app.get('/api/road-detail',async(req,reply)=>{const q=z.object({id:z.string().max(1000)}).parse(req.query);const roads=await getRoads();if(!roads.data?.some(r=>r.id===q.id))return reply.code(404).send({error:'Road bulletin is no longer active in the current source.'});return roadDetail(q.id);});

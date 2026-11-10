@@ -2,6 +2,8 @@ import {distanceMeters} from './navigation';
 import {useEffect,useRef,useState} from 'react';
 import {api} from './lib';
 import type {Place} from './types';
+interface GpsFix{lat:number;lon:number;accuracy?:number;heading?:number;speed?:number|null}
+interface SmoothedFix{current:GpsFix|undefined;saved:GpsFix}
 export function useDevicePlace(gps?:{lat:number;lon:number}){
  const [place,setPlace]=useState<Place>();const [loading,setLoading]=useState(false);const [error,setError]=useState('');const lastRequest=useRef(0);const previousFix=useRef<{lat:number;lon:number}|undefined>(undefined);const cell=gps?`${gps.lat.toFixed(2)}:${gps.lon.toFixed(2)}`:'';
  useEffect(()=>{if(!gps){setPlace(undefined);setLoading(false);return;}let alive=true;let timer:ReturnType<typeof setTimeout>;const fix=gps;const movedFar=previousFix.current&&distanceMeters([fix.lon,fix.lat],[previousFix.current.lon,previousFix.current.lat])>25000;if(movedFar)setPlace(undefined);

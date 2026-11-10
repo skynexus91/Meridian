@@ -1,5 +1,15 @@
-export type ActivityName='return_session'|'place_followed'|'event_opened'|'source_opened'|'map_shared'|'station_player_opened'|'station_started'|'layer_enabled';
+import {trackActivity} from './services/telemetry';
+export type {ActivityName} from './services/telemetry';
+export const track=trackActivity;
 let sessionRecorded=false;
-export function track(name:ActivityName){try{const raw=JSON.parse(localStorage.getItem('meridian:activity')??'[]');const events=Array.isArray(raw)?raw:[];localStorage.setItem('meridian:activity',JSON.stringify([...events,{name,at:new Date().toISOString()}].slice(-500)));}catch{/* Local usage counts never block the interface. */}}
-export function recordSession(){if(!sessionRecorded){sessionRecorded=true;track('return_session');}}
-// Counts stay on this browser. No network analytics, user identity, coordinates or article URLs are recorded.
+export function recordSession(){
+ if(sessionRecorded)return;
+ sessionRecorded=true;
+ track('return_session');
+ const recordTiming=()=>setTimeout(()=>{
+  const timing=performance.getEntriesByType('navigation')[0];
+  if(timing&&timing.duration>2500)track('slow_page_load');
+ },0);
+ if(document.readyState==='complete')recordTiming();
+ else window.addEventListener('load',recordTiming,{once:true});
+}

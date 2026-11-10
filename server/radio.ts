@@ -2,6 +2,8 @@ import {resolveSrv} from 'node:dns/promises';
 import {cached} from './providers.js';
 import {get,put} from './store.js';
 import type {Station} from '../src/types.js';
+import {radioContinent,type RadioScope} from '../src/radioGeography.js';
+import {distanceMeters} from '../src/navigation.js';
 let discovered:{at:number;hosts:string[]}|undefined;
 export async function radioHosts(){
  if(discovered&&Date.now()-discovered.at<600000)return discovered.hosts;
@@ -27,17 +29,33 @@ export function radioStations(rows:any[]):Station[]{
  stations.push(station);names.set(key,station);for(const url of streams)urls.set(url,station);
  }return stations;
 }
-export async function reliableRadio(country:string,name:string){
+type RadioArea={scope:RadioScope;city?:string;region?:string;lat?:number;lon?:number};
+const locality=(value:string)=>clean(value).replace(/\b(county|judetul|judet|municipiul|municipality)\b/g,'').trim();
+export function stationsInArea(stations:Station[],country:string,area:RadioArea){
+ const continent=radioContinent(country);
+ return stations.filter(station=>{
+  if(area.scope==='continent')return !!continent&&radioContinent(station.country)===continent;
+  if(station.country.toUpperCase()!==country)return false;
+  if(area.scope==='country')return true;
+  if(area.scope==='county')return !!area.region&&locality(station.region)===locality(area.region);
+  const city=area.city&&locality(area.city);
+  if(city&&[station.city,station.region].some(value=>locality(value)===city))return true;
+  return area.lat!==undefined&&area.lon!==undefined&&(station.lat!==0||station.lon!==0)&&distanceMeters([area.lon,area.lat],[station.lon,station.lat])<=30000;
+ }).slice(0,100);
+}
+export async function reliableRadio(country:string,name:string,area?:RadioArea){
  const inferredCountry=country?'':radioCountryCode(name)??'';
- const selectedCountry=country||inferredCountry;
+ const selectedCountry=area?.scope==='continent'?'':country||inferredCountry;
  const stationName=inferredCountry?'':name;
- const key='world-radio:v3:'+selectedCountry+':'+clean(stationName);
+ const limit=area&&area.scope!=='country'?500:100;
+ const key='world-radio:v4:'+selectedCountry+':'+clean(stationName)+':'+limit;
  const result=await cached(key,3600000,async()=>{
- const params=new URLSearchParams({limit:'100',hidebroken:'true',order:'clickcount',reverse:'true',is_https:'true'});if(selectedCountry)params.set('countrycode',selectedCountry);if(stationName)params.set('name',stationName);
+ const params=new URLSearchParams({limit:String(limit),hidebroken:'true',order:'clickcount',reverse:'true',is_https:'true'});if(selectedCountry)params.set('countrycode',selectedCountry);if(stationName)params.set('name',stationName);
  let failure:unknown;for(const host of await radioHosts()){try{const response=await fetch(`https://${host}/json/stations/search?${params}`,{signal:AbortSignal.timeout(7000),headers:{'User-Agent':'Meridian/1.0 (+https://meridian-gps-navi-openmaps-libremaps.onrender.com/)','Accept':'application/json'}});if(!response.ok)throw Error('Station directory returned '+response.status);const rows=await response.json();if(!Array.isArray(rows))throw Error('Invalid station directory');const stations=radioStations(rows);const old=get<{stations:Station[]}>('radio-catalog:'+selectedCountry);put('radio-catalog:'+selectedCountry,{at:new Date().toISOString(),stations:[...new Map([...stations,...(old?.stations??[])].map(s=>[s.id,s])).values()].slice(0,250)});return {provider:'Radio Browser',stations};}catch(error){failure=error;}}
  throw failure??Error('Station directory unavailable');
  });
- if(result.data)return result;
+ if(result.data)return area?{...result,data:{...result.data,stations:stationsInArea(result.data.stations,country,area)}}:result;
  const previous=get<{data?:{stations:Station[]};at:string}>('world-radio:'+selectedCountry+':'+stationName);const catalog=get<{stations:Station[];at:string}>('radio-catalog:'+selectedCountry);const stations=(catalog?.stations??previous?.data?.stations??[]).filter(s=>(!stationName||clean(s.name).includes(clean(stationName)))&&(!selectedCountry||s.country===selectedCountry));
- return {...result,...(stations.length?{data:{stations:radioStations(stations.map(s=>({stationuuid:s.id,name:s.name,countrycode:s.country,state:s.region,url:s.stream,url_resolved:s.stream,homepage:s.url,codec:s.codec}))),provider:'Radio Browser · saved directory'},at:catalog?.at??previous?.at}:{})};
+ const scoped=area?stationsInArea(stations,country,area):stations;
+ return {...result,...(scoped.length?{data:{stations:scoped,provider:'Radio Browser · saved directory'},at:catalog?.at??previous?.at}:{})};
 }

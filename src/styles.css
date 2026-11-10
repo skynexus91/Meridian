@@ -539,7 +539,7 @@ html[data-theme="dark"] .route-sheet .sheet-actions .btn-ghost:hover {
 @media(prefers-reduced-motion:reduce){.local-news-sheet,.route-bottom-card{transition:none!important}}
 .poi-search-panel{position:fixed;z-index:43;overflow-y:auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:22px;box-shadow:0 6px 24px #152a3a24;padding:14px}.poi-search-panel>header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.poi-search-panel>header>button{height:34px;width:34px;display:grid;place-items:center;border-radius:50%;background:var(--surface-soft)}.poi-categories{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}.poi-categories button{padding:9px 12px;border:1px solid var(--line);border-radius:20px;background:var(--surface-soft);font-size:12px}.poi-categories button[aria-pressed=true]{background:#1674e8;border-color:#1674e8;color:white}.poi-results>button{display:flex;gap:10px;align-items:center;min-height:54px;border-top:1px solid var(--line);padding:10px 3px;width:100%;text-align:left}.poi-results>button>span{min-width:0}.poi-results strong{display:block;font-size:13px}.poi-results small{display:block;font-size:11px;color:var(--muted);margin-top:5px}.poi-results p{font-size:12px;color:var(--muted);line-height:1.6;padding:12px 0}
 .guidance-active .navigation-panel>header>button[aria-label="Voice guidance"],.guidance-active .navigation-panel>header>button[aria-label="Instrucțiuni vocale"]{display:grid!important}.navigation-panel .route-suggestions{overscroll-behavior:contain}.poi-results>button:hover,.poi-results>button:focus-visible{background:var(--surface-soft);border-radius:12px}.poi-search-panel button:focus-visible,.map-category-chips button:focus-visible{outline:2px solid #1674e8;outline-offset:2px}
-.app:has(.poi-sheet) .route-feedback{display:none}.app:has(.radio-player) .local-news-sheet:not(.dock-collapsed){bottom:78px;max-height:calc(100dvh - 230px)}
+.app:has(.map-inspector) .route-feedback{display:none}.app:has(.radio-player) .local-news-sheet:not(.dock-collapsed){bottom:78px;max-height:calc(100dvh - 230px)}
 @media(max-width:600px){.app:has(.radio-player) .world-panel[data-panel=news]{bottom:78px!important;max-height:calc(70dvh - 78px)!important}}
 .radio-scope{margin:0 18px 12px;color:var(--muted);font-size:12px;line-height:1.5}.radio-retry{margin:12px 18px;padding:10px 16px;border-radius:18px;background:#1674e8;color:white;font-size:12px}.radio-player{max-width:calc(100vw - 24px)}.radio-player>div{min-width:0}.radio-player strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.radio-player small{line-height:1.4}
 .poi-filter-clear{position:fixed;top:144px;left:14px;z-index:25;background:var(--surface);color:var(--ink);padding:9px 12px;display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:20px;box-shadow:0 2px 8px #152a3a22;font-size:11px}
@@ -549,3 +549,116 @@ html[data-theme="dark"] .route-sheet .sheet-actions .btn-ghost:hover {
 .offline-banner{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 24px);padding:9px 15px;border-radius:999px;background:#7a4a00;color:#fff6e5;font-size:12px;font-weight:600;box-shadow:0 8px 22px #0005;pointer-events:none}
 
 .layers-popover{z-index:32;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 44px #0d22332e;overflow-y:auto;overscroll-behavior:contain;padding:14px}.layers-popover header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.layers-popover header button{display:grid;place-items:center;width:32px;height:32px;border:0;border-radius:50%;background:var(--surface-soft);color:var(--ink)}.layers-list{display:grid;gap:2px}.layers-row{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:52px;padding:8px 6px;border-radius:12px;cursor:pointer}.layers-row:hover{background:var(--surface-soft)}.layers-row>span{display:grid;gap:2px}.layers-row small{color:var(--muted);font-size:11px;line-height:1.35}.layers-row input{width:22px;height:22px;flex:0 0 auto;accent-color:#0b7285}
+/* Nearby browsing, map layers, and route preview */
+.local-news-sheet:not(.expanded) {height:auto;min-height:0}
+.local-pulse-metrics {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 8px}
+.local-pulse-metrics button {display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:6px 10px;background:var(--surface-soft);border-radius:12px;color:var(--ink);font-size:13px}
+.local-news-sheet:not(.expanded) .local-news-cards>button {flex:1;min-height:56px;padding:10px 12px}
+.local-news-sheet:not(.expanded) .local-news-cards strong {-webkit-line-clamp:2}
+.map-layer-list {display:grid;padding:0 16px 14px}
+.map-layer-list button {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;padding:8px;text-align:left;border-top:1px solid var(--line)}
+.map-layer-list strong,.map-layer-list small {display:block}
+.map-layer-list small {margin-top:4px;color:var(--muted);font-size:11px}
+.map-layer-switch {width:24px;height:24px;display:grid;place-items:center;flex-shrink:0;border:1px solid var(--line);border-radius:8px;background:var(--surface-soft)}
+[aria-pressed=true]>.map-layer-switch {background:#1674e8;color:white;border-color:#1674e8}
+.route-bottom-card .edit-route {grid-column:1/-1;grid-row:3;justify-self:start;color:var(--ink);min-height:36px;text-decoration:underline;text-underline-offset:3px;font-size:13px}
+.route-bottom-card .navigation-summary>.calculate-route {min-height:44px}
+.guidance-active .topbar .panel-toggle,.guidance-active .topbar .settings-button,.guidance-active .navigation-panel>header>.navigation-heading,.guidance-active .navigation-panel>header>.voice-search,.guidance-active .navigation-panel>header>button[aria-label="Search nearby places"],.guidance-active .navigation-panel>header>button[aria-label="Caută locuri din apropiere"] {display:none}
+.guidance-active .automatic-traffic {display:none!important}
+.guidance-active .route-bottom-card .navigation-instruction span {font-size:16px}
+.guidance-active .route-bottom-card .maneuver-distance {width:max-content;margin-top:4px;padding:2px 7px;border-radius:8px;background:var(--surface-soft);color:var(--ink);font-size:13px;font-weight:650}
+.guidance-active .route-bottom-card .navigation-summary>.calculate-route {background:var(--surface-soft);color:var(--ink);min-height:44px}
+
+@media(max-width:800px) {
+ .world-panel,.world-panel[data-panel=news],.app:has(.topbar[data-near-bottom=true]) .world-panel[data-panel=news] {
+  position:fixed!important;inset:auto 0 0!important;width:100%!important;max-width:none!important;
+  max-height:min(65dvh,calc(100dvh - 100px))!important;border-radius:24px 24px 0 0;
+  padding-bottom:env(safe-area-inset-bottom,0px)
+ }
+ .app:has(.radio-player) .world-panel,.app:has(.radio-player) .world-panel[data-panel=news] {bottom:78px!important}
+ .app:has(.world-panel) .map-controls {visibility:hidden}
+ .local-news-sheet:not(.expanded) {max-height:min(44dvh,calc(100dvh - 150px))}
+ .local-news-sheet:not(.expanded) .dock-body {max-height:calc(44dvh - 46px);overflow:auto}
+ .topbar .navigation-panel .route-bottom-card {left:0!important;width:100%!important;max-width:none;padding-bottom:env(safe-area-inset-bottom,0px)}
+}
+@media(min-width:801px) {
+ .world-panel {position:fixed!important;top:94px!important;left:auto!important;right:16px!important;max-height:calc(100dvh - 162px)!important}
+ .app:not(:has(.world-panel)) .automatic-traffic {display:flex!important;align-items:center;gap:8px;position:fixed;inset:20px 16px auto auto;min-height:44px;padding:8px 12px;background:var(--surface);color:var(--ink);text-align:left;z-index:25;pointer-events:auto}
+ .guidance-active:not(:has(.world-panel)) .automatic-traffic {display:none!important}
+}
+.local-pulse-location {width:100%;display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.local-pulse-location button {display:flex;align-items:center;gap:6px;min-height:44px;padding:8px 12px;border-radius:12px;background:var(--surface-soft);color:var(--ink);text-align:left;font-size:13px}
+.local-pulse-location p {margin:8px 0;color:var(--muted);font-size:12px}
+.traffic-feed-status {display:grid;gap:4px;margin:0 16px 10px;padding:10px 12px;border:1px solid var(--line);border-inline-start:4px solid var(--muted);border-radius:12px;background:var(--surface-soft);font-size:13px}
+.traffic-feed-status[data-status=current] {border-inline-start-color:#239d72}
+.traffic-feed-status[data-status=cached] {border-inline-start-color:#b87b27}
+.traffic-feed-status[data-status=unavailable] {border-inline-start-color:#c96243}
+.traffic-feed-status span {font-size:11px;color:var(--muted)}
+@media (min-width:801px) and (max-width:1120px) {
+ .app:not(:has(.world-panel)) .automatic-traffic {top:150px}
+}
+
+/* Details for selected places and live observations */
+.map-inspector {
+ position:fixed;top:94px;right:16px;width:min(370px,42vw);max-height:calc(100dvh - 170px);
+ z-index:46;overflow:auto;overscroll-behavior:contain;padding:0 18px 16px;
+ border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--ink);box-shadow:0 8px 30px #182b3b25
+}
+.map-inspector>header {position:sticky;top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 0 12px;background:var(--surface);z-index:1}
+.map-inspector h2 {margin:4px 0 0;font-size:20px;line-height:1.25;overflow-wrap:anywhere}
+[data-map-panel] :focus-visible {outline:2px solid #1674e8;outline-offset:2px}
+[data-map-panel] h2:focus-visible {border-radius:4px;outline-offset:4px}
+.inspector-kind {font-size:11px;font-weight:600;color:var(--muted)}
+.map-inspector>p,.inspector-meta {font-size:13px;line-height:1.5}
+.inspector-meta,.inspector-actions {display:flex;flex-wrap:wrap;gap:8px}
+.inspector-meta,.map-inspector .inspector-source {color:var(--muted)}
+.inspector-meta:empty {display:none}
+.inspector-actions {margin-top:12px}
+.inspector-actions button {min-height:44px;padding:8px 14px;border-radius:20px;background:var(--surface-soft);color:var(--ink)}
+.inspector-actions .inspector-primary {background:#1674e8;color:white}
+.map-inspector .inspector-source {font-size:11px;margin-top:12px}
+.map-selection-ring {width:48px;height:48px;border:2px solid #1674e8;border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 0 6px #1674e847;pointer-events:none;z-index:2}
+.app:has(.map-inspector) .automatic-traffic {visibility:hidden}
+.news-map-marker {width:30px;height:30px;display:grid;place-items:center;border:2px solid #7456ba;border-radius:50%;background:var(--surface);color:var(--ink);box-shadow:0 2px 6px #19384c40}
+.news-map-marker:hover,.news-map-marker:focus-visible {outline:3px solid #7456ba;outline-offset:2px}
+.road-marker {z-index:1}
+.picking-pin .poi-marker,.picking-pin .road-marker,.picking-pin .news-map-marker {pointer-events:none}
+@media (max-width:800px) {
+ .map-inspector {top:auto;right:0;bottom:0;left:0;width:100%;max-height:52dvh;border-radius:24px 24px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+ .app:has(.radio-player) .map-inspector {bottom:78px;max-height:calc(52dvh - 78px)}
+ .app:has(.map-inspector) .map-controls {visibility:hidden}
+}
+
+.weather-timeline .timeline-frame-tools {display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0;color:var(--muted);font-size:12px}
+.weather-timeline {position:fixed;z-index:30;left:16px;right:auto;bottom:12px!important;width:min(430px,calc(100% - 32px));max-height:45dvh;overflow:auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 30px #182b3b25}
+.weather-timeline>small {font-size:11px;color:var(--muted)}
+.weather-timeline input {accent-color:#1674e8}
+.weather-timeline .timeline-heading {font-family:inherit;font-size:14px;font-weight:600;line-height:1.4;letter-spacing:normal}
+.weather-timeline .timeline-heading button,.weather-timeline .timeline-controls button {display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;border-radius:12px;background:var(--surface-soft);color:var(--ink)}
+.weather-timeline .timeline-controls {margin-top:8px}
+.weather-timeline .timeline-controls>span,.weather-timeline .timeline-bottom>span,.weather-timeline .timeline-bottom label {font-size:12px;color:var(--muted)}
+.app:has(.radio-player) .weather-timeline {bottom:110px!important}
+@media(max-width:800px) {
+ .weather-timeline {left:0;bottom:0!important;width:100%;border-radius:22px 22px 0 0;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+}
+.weather-timeline .timeline-frame-tools:has(>span:empty):not(:has(>button)) {display:none}
+.weather-timeline .timeline-frame-tools>button {min-height:34px;padding:4px 10px;border:1px solid var(--line);border-radius:10px;color:var(--ink);background:var(--surface-soft)}
+.weather-timeline :focus-visible {outline:2px solid #1674e8;outline-offset:2px}
+.weather-timeline button:disabled,.weather-timeline input:disabled {opacity:.5;cursor:default}
+
+.drive-tools-panel {position:fixed;z-index:58;top:94px;right:16px;width:min(390px,calc(100% - 32px));padding:16px;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink);box-shadow:0 8px 30px #182b3b25}
+.drive-tools-panel header,.drive-tools-actions,.drive-tools-invite {display:flex;align-items:center;gap:8px}
+.drive-tools-panel header {justify-content:space-between}
+.drive-tools-panel p {margin:8px 0}
+.drive-tools-panel button {min-height:44px;padding:6px 12px;border-radius:12px;background:var(--surface-soft)}
+.drive-tools-invite input {min-width:0;flex:1;padding:8px}
+.drive-tools-panel audio {max-width:100%}
+
+.drive-viewer,.drive-viewer-map {position:fixed;inset:0}
+.drive-viewer .drive-tools-panel {top:16px}
+
+.route-hazard {position:fixed;z-index:30;left:12px;top:265px;display:flex;align-items:center;gap:8px;width:max-content;max-width:calc(100vw - 90px);padding:10px 12px;border:1px solid #c47c21;border-radius:14px;background:var(--surface);color:var(--ink);font-size:13px;font-weight:650}
+.route-hazard svg {flex-shrink:0;color:#ae6617}
+.app:has(.voice-call-panel) .drive-share-panel {top:auto;bottom:14px}
+.radio-geography{margin:0 16px 12px}.radio-geography button{min-height:40px}.radio-geography button:disabled{opacity:.5}
+.voice-call-actions button{display:inline-flex;align-items:center;gap:8px;min-height:44px}.voice-call-actions .voice-call-start{background:#147553;color:#fff}.voice-call-actions .voice-call-end{background:#b3333e;color:#fff}.voice-call-actions button:disabled{opacity:.45;cursor:default}
