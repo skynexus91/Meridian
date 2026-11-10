@@ -663,5 +663,7 @@ html[data-theme="dark"] .route-sheet .sheet-actions .btn-ghost:hover {
 .radio-geography{margin:0 16px 12px}.radio-geography button{min-height:40px}.radio-geography button:disabled{opacity:.5}
 .voice-call-actions button{display:inline-flex;align-items:center;gap:8px;min-height:44px}.voice-call-actions .voice-call-start{background:#147553;color:#fff}.voice-call-actions .voice-call-end{background:#b3333e;color:#fff}.voice-call-actions button:disabled{opacity:.45;cursor:default}
 
-/* Provider credits stay in the map metadata. The always-visible strip is hidden to keep the map edge clear. */
+/* The SDK credit strip is hidden; a compact (c) button in MapView shows the same credits on demand. */
 .tomtom-attribution-logos,.maplibregl-ctrl-attrib{display:none!important}
+
+.map-credits{position:absolute;right:70px;bottom:92px;z-index:3;display:flex;align-items:flex-end;gap:6px}.map-credits>button{width:26px;height:26px;border-radius:50%;border:1px solid #43584c;background:#1b2f30dd;color:#b7cfb8;font-size:12px;line-height:1;cursor:pointer}.map-credits>button[aria-expanded=true]{background:#2c4a3f;color:#fff}.map-credits-list{max-width:260px;padding:7px 9px;border-radius:6px;background:#1b2f30ee;color:#b7cfb8;font-size:9px;line-height:1.35;box-shadow:0 6px 18px #0005}

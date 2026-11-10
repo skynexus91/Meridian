@@ -5,7 +5,7 @@ import {useTranslation} from './i18n';
 import {useEffect,useRef,useState,type RefObject} from 'react';
 import * as maplibregl from 'maplibre-gl';
 import {type Map as MapType,type GeoJSONSource} from 'maplibre-gl';
-import {createBasemapMap,applyBasemap,basemapStyle} from './basemap';
+import {createBasemapMap,applyBasemap,basemapStyle,type BasemapProvider} from './basemap';
 import type {EarthLayer,OrbitalSatellite,NewsEvent,Place,Observation,WeatherFrame,Camera,Station,POI} from './types';
 import {LocateFixed,Plus,Minus,Map as MapIcon} from 'lucide-react';
 type MarkerItem={id:string;name:string;lon:number;lat:number};
@@ -81,7 +81,7 @@ const poiIcons:Record<POI['type'],string>={
  speed_bump:markerIcon(warningPath),
 };
 interface Props {onMapCenter?:(lon:number,lat:number,zoom:number)=>void;pickingPin?:boolean;onMapPin?:(lon:number,lat:number)=>void;mapPin?:Place;gps?:{lon:number;lat:number;heading?:number;accuracy?:number;speed?:number|null};navigating?:boolean;onReady:(ready:boolean)=>void;routing?:RoutingState;inspectedMarker?:{id:string;lon:number;lat:number};inspectorRef:RefObject<HTMLElement|null>;theme:string;earthLayer?:EarthLayer;earthOpacity:number;satellites:OrbitalSatellite[];selectedSatellite:string;onSatellite:(id:string)=>void;forecastPlace?:Place;events:NewsEvent[];country:string;focus?:Place;onSelect:(id:string)=>void;observations:Observation[];onObservation:(o:Observation)=>void;frame?:WeatherFrame;opacity:number;satellite:boolean;cameras:Camera[];stations:Station[];onCamera:(c:Camera)=>void;onStation:(s:Station)=>void;flow?:string;weatherRequest?:string;onWeatherReady?:(request:string)=>void;pois:POI[];onPoi:(poi:POI)=>void;onGps?:()=>void}
-export default function MapView(p:Props){const tr=useTranslation();const element=useRef<HTMLDivElement>(null);const map=useRef<MapType|undefined>(undefined);const latest=useRef(p);latest.current=p;const [ready,setReady]=useState(false);const [failed,setFailed]=useState(false);const [tileError,setTileError]=useState(false);const [followGps,setFollowGps]=useState(true);
+export default function MapView(p:Props){const tr=useTranslation();const element=useRef<HTMLDivElement>(null);const map=useRef<MapType|undefined>(undefined);const latest=useRef(p);latest.current=p;const [ready,setReady]=useState(false);const [failed,setFailed]=useState(false);const [tileError,setTileError]=useState(false);const [followGps,setFollowGps]=useState(true);const [basemap,setBasemap]=useState<BasemapProvider|undefined>(undefined);const [creditsOpen,setCreditsOpen]=useState(false);
  useEffect(()=>setFollowGps(true),[p.navigating]);
  const poiMarkers=useRef(new Map<string,MarkerEntry<POI>>());
  const newsMarkers=useRef(new Map<string,MarkerEntry<MarkerItem>>());
@@ -112,10 +112,10 @@ export default function MapView(p:Props){const tr=useTranslation();const element
  },[ready,p.gps,p.navigating,followGps,p.routing?.route,p.inspectedMarker]);
  useEffect(()=>()=>{cancelAnimationFrame(gpsAnimation.current);gpsMarker.current?.remove();gpsMarker.current=undefined;},[]);
  useEffect(()=>{if(!ready)return;const canvas=map.current?.getCanvas();if(!canvas)return;canvas.style.cursor=p.pickingPin?'crosshair':'';},[ready,p.pickingPin]);
- useEffect(()=>{if(!ready||!p.mapPin)return;const marker=new maplibregl.Marker({color:'#ec5b4c'}).setLngLat([p.mapPin.lon,p.mapPin.lat]).addTo(map.current!);marker.getElement().setAttribute('aria-label','Selected map pin');marker.getElement().style.pointerEvents='none';return()=>{marker.remove();};},[ready,p.mapPin]);
+ useEffect(()=>{if(!p.mapPin||!map.current)return;const marker=new maplibregl.Marker({color:'#ec5b4c'}).setLngLat([p.mapPin.lon,p.mapPin.lat]).addTo(map.current);marker.getElement().setAttribute('aria-label','Selected map pin');marker.getElement().style.pointerEvents='none';return()=>{marker.remove();};},[ready,p.mapPin]);
  useEffect(()=>{if(!element.current)return;let m:MapType;let provider;try{
  const created=createBasemapMap(element.current,{center:[29,47.3],zoom:4.8,minZoom:1,maxZoom:19},latest.current.theme==='dark');
-  m=created.map;provider=created.provider;map.current=m;element.current.dataset.basemap=provider;
+  m=created.map;provider=created.provider;map.current=m;element.current.dataset.basemap=provider;setBasemap(provider);
  }catch{setFailed(true);return;}
  m.on('click',e=>{if(latest.current.pickingPin)latest.current.onMapPin?.(e.lngLat.lng,e.lngLat.lat);});
  m.on('dragstart',()=>setFollowGps(false));m.on('moveend',()=>{const center=m.getCenter();latest.current.onMapCenter?.(center.lng,center.lat,m.getZoom());if(element.current)element.current.dataset.zoom=m.getZoom().toFixed(2);});m.once('style.load',()=>{
@@ -153,10 +153,10 @@ export default function MapView(p:Props){const tr=useTranslation();const element
    if(basemapLoaded)return;
    const element0=element.current;
    if(styleFailure&&element0&&element0.dataset.basemap!=='osm'){
-    try{m.setStyle(basemapStyle('osm',latest.current.theme==='dark'));element0.dataset.basemap='osm';setTileError(false);return;}catch{}
+    try{m.setStyle(basemapStyle('osm',latest.current.theme==='dark'));element0.dataset.basemap='osm';setBasemap('osm');setTileError(false);return;}catch{}
    }
    if(element0&&element0.dataset.basemap!=='osm'){
-    try{applyBasemap(m,'osm',latest.current.theme==='dark');element0.dataset.basemap='osm';setTileError(false);return;}catch{}
+    try{applyBasemap(m,'osm',latest.current.theme==='dark');element0.dataset.basemap='osm';setBasemap('osm');setTileError(false);return;}catch{}
    }
    setTileError(true);
   },2500);
@@ -328,5 +328,5 @@ export default function MapView(p:Props){const tr=useTranslation();const element
   return ()=>{markers.forEach(marker=>marker.remove());};
  },[ready,p.navigating,p.routing?.enabled,p.routing?.points,p.routing?.route]);
  useEffect(()=>{if(!ready)return;const m=map.current!;if(m.getLayer('road-flow'))m.removeLayer('road-flow');if(m.getSource('road-flow'))m.removeSource('road-flow');if(p.flow){m.addSource('road-flow',{type:'raster',tiles:[p.flow],tileSize:256,attribution:'© TomTom Traffic'});m.addLayer({id:'road-flow',type:'raster',source:'road-flow',paint:{'raster-opacity':.8}},'traffic');}},[ready,p.flow]);
-  return <div className="map-wrap"><div ref={element} className="map-canvas" data-testid="map-canvas"/>{failed&&<div className="map-failure"><MapIcon/><h3>{tr("Map graphics unavailable")}</h3><p>{tr("Your browser needs WebGL. News, weather and radio remain available in the side panel.")}</p></div>}<div className="map-controls"><button aria-label={tr("Follow GPS")} aria-pressed={followGps} onClick={()=>{setFollowGps(true);if(p.gps)map.current?.easeTo({center:[p.gps.lon,p.gps.lat],zoom:p.navigating?18:17,duration:500});else p.onGps?.();}}><LocateFixed size={17}/></button><button aria-label={tr("Zoom in")} onClick={()=>map.current?.zoomIn()}><Plus size={17}/></button><button aria-label={tr("Zoom out")} onClick={()=>map.current?.zoomOut()}><Minus size={17}/></button></div>{tileError&&<div className="tile-notice">{tr("Some map imagery could not load. Data panels remain available.")}</div>}</div>;
+  return <div className="map-wrap"><div ref={element} className="map-canvas" data-testid="map-canvas"/>{failed&&<div className="map-failure"><MapIcon/><h3>{tr("Map graphics unavailable")}</h3><p>{tr("Your browser needs WebGL. News, weather and radio remain available in the side panel.")}</p></div>}<div className="map-credits"><button aria-label={tr("Map credits")} aria-expanded={creditsOpen} onClick={()=>setCreditsOpen(v=>!v)}>©</button>{creditsOpen&&<div className="map-credits-list" role="status">{basemap==="azure"?"© Microsoft · © TomTom":basemap==="tomtom"?"TomTom · © OpenStreetMap · Imagery © Esri, Maxar, Earthstar Geographics · Traffic flow by TomTom":"© OpenStreetMap contributors · Imagery © Esri, Maxar, Earthstar Geographics"}</div>}</div><div className="map-controls"><button aria-label={tr("Follow GPS")} aria-pressed={followGps} onClick={()=>{setFollowGps(true);if(p.gps)map.current?.easeTo({center:[p.gps.lon,p.gps.lat],zoom:p.navigating?18:17,duration:500});else p.onGps?.();}}><LocateFixed size={17}/></button><button aria-label={tr("Zoom in")} onClick={()=>map.current?.zoomIn()}><Plus size={17}/></button><button aria-label={tr("Zoom out")} onClick={()=>map.current?.zoomOut()}><Minus size={17}/></button></div>{tileError&&<div className="tile-notice">{tr("Some map imagery could not load. Data panels remain available.")}</div>}</div>;
 }

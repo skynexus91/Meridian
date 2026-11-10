@@ -150,6 +150,14 @@ succeeds.
 - `src/MapView.tsx`: POIs sharing a coordinate are fanned out in a small ring, so overlapping markers are individually tappable.
 - Verification: `npx tsc --noEmit` clean, `npm test` 108/108, `npm run build` OK. `tests/e2e/app.spec.ts` passed 15/15 desktop and 15/15 mobile. POI click and touch open the matching inspector on both viewports.
 
+## 11. Map credits, pin feedback and POI notice polish
+- The TomTom SDK credit strip stays hidden. A compact `©` button next to the zoom controls now opens the same credits on demand: provider, OpenStreetMap, Esri imagery and traffic attribution.
+- Map pin feedback no longer waits for the basemap to finish loading. The marker appears as soon as the destination is chosen.
+- The "online POIs unavailable" notice only appears when the request failed and returned no POIs. Cached or partial results no longer trigger it while a POI inspector is open.
+- Browser tests mock `/api/gps/snap`, so the mapped-speed-limit assertions no longer depend on a live TomTom response.
+- Azure Maps verified live after adding `VITE_AZURE_MAPS_KEY` to `.env`: `data-basemap="azure"`, Microsoft `microsoft.base.road` tiles load on desktop and mobile, no tile warning.
+- Verification after this batch: `tsc` clean, 108/108 unit tests, production build OK.
+
 ## Open items (not blocking)
 - Route alternatives (TomTom `maxAlternatives`) and avoid options.
 - Render deployment: needs explicit user confirmation.

@@ -7,6 +7,7 @@ test.beforeEach(async({page,context})=>{
  await context.grantPermissions(['geolocation','microphone']);await context.setGeolocation({latitude:44.4268,longitude:26.1025});
  await page.route('**/api/suggestions?*',r=>r.fulfill({json:{places:[]}}));
  await page.route('**/api/speed-roads?*',r=>r.fulfill({json:{data:{roads:[]},stale:false}}));
+ await page.route('**/api/gps/snap?*',r=>r.fulfill({json:{lat:44.4268,lon:26.1025,snapped:false,distance:0,provider:'test'}}));
  await page.route('**/api/pois?*',r=>r.fulfill({json:{pois:[{id:'osm:node:44',name:'Nearby fuel',type:'fuel',city:'București',region:'București',lat:44.427,lon:26.103,rights:'OpenStreetMap'}]}}));await page.route('**/api/route-pois?*',r=>r.fulfill({json:{data:{pois:[]},stale:false}}));
  await page.route('**/api/places',r=>r.fulfill({json:{places}}));
  await page.route('**/api/weather?*',r=>r.fulfill({json:{data:{provider:'Open-Meteo',current:{temperature_2m:12,wind_speed_10m:5,relative_humidity_2m:70,time:'2026-11-06T12:00'},hourly:{time:[],temperature_2m:[],precipitation:[]}},stale:false}}));

@@ -39,8 +39,35 @@ Worldwide search, routing and information panels are supported. Public-provider 
 | November 10 | Switched the navigation map and shared-drive viewer to TomTom Orbis through a server-side credential proxy. Fixed the false imagery warning during overlay failures and removed the legacy attribution strip. Added location-first radio and visible Call and Hang up controls. |
 | November 10 | Added privacy-aware request and lifecycle logging, an Overpass outage cooldown, and traffic and navigation regression coverage. The production build, 106 unit tests, and focused Chromium checks passed. The full browser matrix remains incomplete. |
 | November 10 | Made Azure Maps the primary basemap through MapLibre raster tiles (`microsoft.base.road`, `microsoft.imagery`), with TomTom Orbis second and OpenStreetMap/Esri as the free fallback. Fixed `fastifyStatic` to serve compiled assets directly. |
+| November 10 | Hid the long provider credit strip behind a compact `©` button. Map pin feedback no longer waits for basemap tiles. POI availability warnings appear only when no POIs load. Read-aloud falls back to browser speech when the app voice service is unavailable. |
 
 See the [engineering and QA log](ENGINEERING_QA_LOG.md) for the detailed day-by-day record, the [advanced feature guide](ADVANCED_FEATURES.md) for architecture and setup, and the [production testing guide](PRODUCTION_TESTING.md) for release checks.
+
+## Documentation index
+
+Every Markdown document in the project root:
+
+| Document | Purpose |
+|---|---|
+| [README.md](README.md) | Product overview, features, setup, environment variables and deployment. |
+| [ADVANCED_FEATURES.md](ADVANCED_FEATURES.md) | Architecture, provider integrations and advanced feature setup. |
+| [APP_REVIEW.md](APP_REVIEW.md) | Product and implementation review with validation notes. |
+| [ENGINEERING_QA_LOG.md](ENGINEERING_QA_LOG.md) | Dated engineering and QA log. |
+| [ENGINEERING_QA_PLAN.md](ENGINEERING_QA_PLAN.md) | Test strategy and QA plan. |
+| [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) | Current implementation status by area. |
+| [OPENCODE_HANDOFF.md](OPENCODE_HANDOFF.md) | Handoff notes for the next coding session. |
+| [OPENCODE_PROMPT.md](OPENCODE_PROMPT.md) | Project prompt and working rules. |
+| [PRD.md](PRD.md) | Product requirements. |
+| [PRODUCTION_READINESS_REPORT.md](PRODUCTION_READINESS_REPORT.md) | Production readiness assessment. |
+| [PRODUCTION_REPORT.md](PRODUCTION_REPORT.md) | Production verification report. |
+| [PRODUCTION_TESTING.md](PRODUCTION_TESTING.md) | Release and staging test checklist. |
+| [QA_REVIEW.md](QA_REVIEW.md) | QA findings and regression notes. |
+| [QA_STATUS_BRIEF.md](QA_STATUS_BRIEF.md) | Short QA status summary. |
+| [SOURCE_INVENTORY.md](SOURCE_INVENTORY.md) | Source and provider inventory. |
+| [STARTUP_MASTER_PLAN.md](STARTUP_MASTER_PLAN.md) | Startup and delivery plan. |
+| [TESTING.md](TESTING.md) | How to run unit, browser and smoke tests. |
+| [UX_REVIEW.md](UX_REVIEW.md) | Interface review, delivered fixes and roadmap. |
+| [WORKLOG.md](WORKLOG.md) | Chronological work log with verification results. |
 
 ## Local development
 

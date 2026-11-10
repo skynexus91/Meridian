@@ -38,6 +38,8 @@ Method: Playwright flows (`scripts/ux-audit.mjs`), accessibility audit of button
 10. **POI overlap** — markers that share a coordinate fan out on a small ring, so each POI can be clicked or tapped. Verified on desktop 1440×900 and Pixel 7.
 11. **Read-aloud resilience** — browser `speechSynthesis` takes over when the app voice service is unavailable; pause, resume and stop work in both modes.
 12. **News dock** — starts collapsed so the map stays visible, and expands by drag or tap.
+13. **Map credits** — the long provider strip is replaced by a small `©` button that lists the same credits on demand.
+14. **POI availability notice** — shown only when no POIs could be loaded, so an open inspector is not interrupted by a stale warning.
 
 ## Recommended next (not implemented yet)
 - **Route alternatives**: TomTom `maxAlternatives` returns up to three routes; show distance, ETA and traffic delay per option, with a "fastest / shortest / avoid tolls" toggle.
